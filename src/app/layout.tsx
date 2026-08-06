@@ -1,3 +1,4 @@
+import { Providers } from "./providers";
 import {
   Space_Grotesk,
   Inter,
@@ -45,7 +46,7 @@ export default function RootLayout({
       <body
         className={`${spaceGrotesk.variable} ${inter.variable} ${orbitron.variable} ${rajdhani.variable} ${cinzel.variable} font-body bg-bg-primary text-text-primary`}
       >
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
