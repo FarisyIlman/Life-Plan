@@ -7,9 +7,9 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  const email = "farisy.ilman@mhs.itenas.ac.id"; // change to your real email
-  const password = "farisyilman2004"; // change this before running!
-  const name = "Farisy";
+  const email = process.env.SEED_ADMIN_EMAIL!;
+  const password = process.env.SEED_ADMIN_PASSWORD!;
+  const name = process.env.SEED_ADMIN_NAME || "Farisy";
 
   const existing = await prisma.admin.findUnique({ where: { email } });
   if (existing) {
