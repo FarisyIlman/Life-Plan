@@ -1,0 +1,192 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================
+// ADMIN & AUTH
+// ============================================
+
+model Admin {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  username      String   @unique
+  passwordHash  String
+  name          String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  activityLogs  ActivityLog[]
+
+  @@map("admins")
+}
+
+// ============================================
+// ERA / YEAR (Major period / theme)
+// ============================================
+
+model Era {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  theme       ThemeType
+  startYear   Int
+  endYear     Int
+  description String?  @db.Text
+  isPublished Boolean  @default(false)
+  order       Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  contentBlocks    ContentBlock[]
+  achievementGoals AchievementGoal[]
+
+  @@map("eras")
+}
+
+enum ThemeType {
+  GALAXY
+  MONTHLY
+  RACING
+  VOYAGE
+  TREE
+}
+
+// ============================================
+// CONTENT BLOCK
+// ============================================
+
+model ContentBlock {
+  id          String       @id @default(cuid())
+  eraId       String
+  era         Era          @relation(fields: [eraId], references: [id], onDelete: Cascade)
+
+  type        String
+  title       String
+  subtitle    String?
+  data        Json
+
+  deadline    DateTime?
+  isCompleted Boolean      @default(false)
+
+  order       Int
+  isPublished Boolean      @default(false)
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  notifications Notification[]
+
+  @@index([eraId])
+  @@index([deadline])
+  @@map("content_blocks")
+}
+
+// ============================================
+// ACHIEVEMENT GOAL
+// ============================================
+
+model AchievementGoal {
+  id              String            @id @default(cuid())
+  eraId           String
+  era             Era               @relation(fields: [eraId], references: [id], onDelete: Cascade)
+
+  year            Int
+  category        AchievementCategory
+
+  targetMin       Float
+  targetIdeal     Float
+  actualValue     Float?
+
+  status          AchievementStatus  @default(PENDING)
+  imageUrl        String?
+
+  note            String?  @db.Text
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([eraId, year, category])
+  @@map("achievement_goals")
+}
+
+enum AchievementCategory {
+  SALARY
+  SAVING
+}
+
+enum AchievementStatus {
+  PENDING
+  UNDER_ACHIEVED
+  ACHIEVED
+  OVER_ACHIEVED
+}
+
+// ============================================
+// NOTIFICATION
+// ============================================
+
+model Notification {
+  id              String   @id @default(cuid())
+  contentBlockId  String
+  contentBlock    ContentBlock @relation(fields: [contentBlockId], references: [id], onDelete: Cascade)
+
+  type            NotificationType
+  message         String
+  isRead          Boolean  @default(false)
+
+  createdAt       DateTime @default(now())
+
+  @@index([isRead])
+  @@map("notifications")
+}
+
+enum NotificationType {
+  DEADLINE_7D
+  DEADLINE_3D
+  DEADLINE_1D
+  COMPLETED
+}
+
+// ============================================
+// ACTIVITY LOG
+// ============================================
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+  adminId     String
+  admin       Admin    @relation(fields: [adminId], references: [id])
+
+  action      String
+  entityType  String
+  entityId    String
+  detail      Json?
+
+  createdAt   DateTime @default(now())
+
+  @@index([adminId])
+  @@map("activity_logs")
+}
+
+// ============================================
+// MASTER DEGREE FLOWCHART
+// ============================================
+
+model MasterDegreeNode {
+  id        String   @id @default(cuid())
+  label     String
+  nodeType  String
+  positionX Float
+  positionY Float
+
+  parentId  String?
+  parent    MasterDegreeNode?  @relation("NodeHierarchy", fields: [parentId], references: [id])
+  children  MasterDegreeNode[] @relation("NodeHierarchy")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("master_degree_nodes")
+}
