@@ -2,8 +2,10 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { authConfig } from "./auth.config";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  ...authConfig,
   providers: [
     Credentials({
       credentials: {
@@ -16,28 +18,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         if (!email || !password) return null;
 
-        const admin = await prisma.admin.findUnique({
-          where: { email },
-        });
-
+        const admin = await prisma.admin.findUnique({ where: { email } });
         if (!admin) return null;
 
         const isValid = await bcrypt.compare(password, admin.passwordHash);
         if (!isValid) return null;
 
-        return {
-          id: admin.id,
-          email: admin.email,
-          name: admin.name,
-        };
+        return { id: admin.id, email: admin.email, name: admin.name };
       },
     }),
   ],
   session: {
     strategy: "jwt",
-    maxAge: 24 * 60 * 60, // 24 hours, per Section 11.1
-  },
-  pages: {
-    signIn: "/admin/login",
+    maxAge: 24 * 60 * 60,
   },
 });
