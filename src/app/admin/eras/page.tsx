@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { deleteEra } from "@/lib/actions/era";
+import DeleteEraButton from "./delete-button";
 
 export default async function ErasPage() {
   const eras = await prisma.era.findMany({
@@ -59,20 +59,7 @@ export default async function ErasPage() {
                 >
                   Edit
                 </Link>
-                <form
-                  action={async () => {
-                    "use server";
-                    await deleteEra(era.id);
-                  }}
-                  className="inline"
-                >
-                  <button
-                    type="submit"
-                    className="text-red-400 hover:underline"
-                  >
-                    Delete
-                  </button>
-                </form>
+                <DeleteEraButton id={era.id} />
               </td>
             </tr>
           ))}
