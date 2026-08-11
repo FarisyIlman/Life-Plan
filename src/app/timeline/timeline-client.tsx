@@ -15,7 +15,7 @@ const THEME_COLORS: Record<string, string> = {
 };
 
 export default function TimelineClient({ eras }: { eras: Era[] }) {
-  const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const sectionRefs = useRef<(HTMLElement | null)[]>([]);
   const bgRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
