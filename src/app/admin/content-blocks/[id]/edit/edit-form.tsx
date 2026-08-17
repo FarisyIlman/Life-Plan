@@ -18,10 +18,11 @@ export default function EditContentBlockForm({
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(false);
 
-  const data = block.data as {
+  const data = (block.data ?? {}) as {
     description?: string;
     techStack?: string;
     responsibilities?: string;
+    month?: number;
   };
 
   const handleSubmit = async (formData: FormData) => {
@@ -76,6 +77,20 @@ export default function EditContentBlockForm({
         {errors.type && (
           <p className="text-red-400 text-sm mt-1">{errors.type[0]}</p>
         )}
+      </div>
+
+      <div>
+        <label className="block text-text-muted text-sm mb-1">
+          Month (only for Monthly theme, 1-12)
+        </label>
+        <input
+          name="month"
+          type="number"
+          min={1}
+          max={12}
+          defaultValue={data.month ?? ""}
+          className="w-full p-2 rounded bg-bg-secondary border border-border text-text-primary"
+        />
       </div>
 
       <div>

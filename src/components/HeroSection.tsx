@@ -7,13 +7,17 @@ import Link from "next/link";
 export default function HeroSection() {
   const stars = useMemo(
     () =>
-      Array.from({ length: 60 }, () => ({
-        width: Math.random() * 2 + 1,
-        height: Math.random() * 2 + 1,
-        top: `${Math.random() * 100}%`,
-        left: `${Math.random() * 100}%`,
-        opacity: Math.random() * 0.6 + 0.2,
-      })),
+      Array.from({ length: 60 }, (_, index) => {
+        const seed = index * 13.37;
+
+        return {
+          width: ((seed % 3) + 1) * 0.8,
+          height: ((seed % 5) + 1) * 0.8,
+          top: `${(seed * 7.3) % 100}%`,
+          left: `${(seed * 11.7) % 100}%`,
+          opacity: 0.2 + ((index % 7) / 10),
+        };
+      }),
     [],
   );
 

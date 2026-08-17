@@ -9,11 +9,13 @@ function buildData(parsed: {
   description?: string;
   techStack?: string;
   responsibilities?: string;
+  month?: number;
 }) {
   return {
     description: parsed.description || "",
     techStack: parsed.techStack || "",
     responsibilities: parsed.responsibilities || "",
+    month: parsed.month || null,
   };
 }
 
@@ -39,6 +41,7 @@ export async function createContentBlock(formData: FormData) {
     description,
     techStack,
     responsibilities,
+    month,
   } = parsed.data;
 
   await prisma.contentBlock.create({
@@ -47,7 +50,7 @@ export async function createContentBlock(formData: FormData) {
       type,
       title,
       subtitle: subtitle || null,
-      data: buildData({ description, techStack, responsibilities }),
+      data: buildData({ description, techStack, responsibilities, month }),
       deadline: deadline ? new Date(deadline) : null,
       order,
       isPublished,
@@ -80,6 +83,7 @@ export async function updateContentBlock(id: string, formData: FormData) {
     description,
     techStack,
     responsibilities,
+    month,
   } = parsed.data;
 
   await prisma.contentBlock.update({
@@ -89,7 +93,7 @@ export async function updateContentBlock(id: string, formData: FormData) {
       type,
       title,
       subtitle: subtitle || null,
-      data: buildData({ description, techStack, responsibilities }),
+      data: buildData({ description, techStack, responsibilities, month }),
       deadline: deadline ? new Date(deadline) : null,
       order,
       isPublished,

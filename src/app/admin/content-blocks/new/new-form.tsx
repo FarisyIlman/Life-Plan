@@ -68,6 +68,20 @@ export default function NewContentBlockForm({
       </div>
 
       <div>
+        <label className="block text-text-muted text-sm mb-1">
+          Month (only for Monthly theme, 1-12)
+        </label>
+        <input
+          name="month"
+          type="number"
+          min={1}
+          max={12}
+          defaultValue=""
+          className="w-full p-2 rounded bg-bg-secondary border border-border text-text-primary"
+        />
+      </div>
+
+      <div>
         <label className="block text-text-muted text-sm mb-1">Title</label>
         <input
           name="title"
