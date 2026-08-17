@@ -8,7 +8,11 @@ export const contentBlockSchema = z.object({
   description: z.string().optional(),
   techStack: z.string().optional(),
   responsibilities: z.string().optional(),
-  month: z.coerce.number().int().min(1).max(12).optional(),
+  month: z
+    .string()
+    .optional()
+    .transform((val) => (val && val !== "" ? parseInt(val, 10) : undefined))
+    .pipe(z.number().int().min(1).max(12).optional()),
   deadline: z.string().optional(),
   order: z.coerce.number().int().default(0),
   isPublished: z.coerce.boolean().default(false),
