@@ -7,5 +7,27 @@ export const metadata: Metadata = {
 };
 
 export default function AboutPage() {
-  return <AboutClient />;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: "Farisy Syarif",
+    alternateName: ["xEmrys", "Edward", "mdtamla"],
+    url: process.env.AUTH_URL || "http://localhost:3000",
+    sameAs: ["https://github.com/FarisyIlman"],
+    jobTitle: "Student & Software Developer",
+    affiliation: {
+      "@type": "CollegeOrUniversity",
+      name: "Itenas",
+    },
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <AboutClient />
+    </>
+  );
 }
