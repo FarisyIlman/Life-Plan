@@ -1,7 +1,24 @@
+import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import GalaxyEraView from "./galaxy-era-view";
 import MonthlyEraView from "./monthly-era-view";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const era = await prisma.era.findUnique({ where: { slug } });
+
+  if (!era) return { title: "Not Found" };
+
+  return {
+    title: `${era.title} | Through The Time`,
+    description: era.description || `Explore the ${era.title} era.`,
+  };
+}
 
 export default async function EraDetailPage({
   params,
