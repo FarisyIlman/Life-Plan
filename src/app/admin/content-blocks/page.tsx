@@ -28,6 +28,7 @@ export default async function ContentBlocksPage() {
             <th className="py-2">Title</th>
             <th className="py-2">Deadline</th>
             <th className="py-2">Status</th>
+            <th className="py-2">Completed</th>
             <th className="py-2">Actions</th>
           </tr>
         </thead>
@@ -50,6 +51,13 @@ export default async function ContentBlocksPage() {
                 >
                   {block.isPublished ? "Published" : "Draft"}
                 </span>
+              </td>
+              <td className="py-3">
+                {block.isCompleted ? (
+                  <span className="text-green-400">✓ Done</span>
+                ) : (
+                  <span className="text-text-muted">—</span>
+                )}
               </td>
               <td className="py-3 space-x-3">
                 <Link

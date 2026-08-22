@@ -38,6 +38,7 @@ export async function createContentBlock(formData: FormData) {
     deadline,
     order,
     isPublished,
+    isCompleted,
     description,
     techStack,
     responsibilities,
@@ -54,6 +55,7 @@ export async function createContentBlock(formData: FormData) {
       deadline: deadline ? new Date(deadline) : null,
       order,
       isPublished,
+      isCompleted,
     },
   });
 
@@ -80,6 +82,7 @@ export async function updateContentBlock(id: string, formData: FormData) {
     deadline,
     order,
     isPublished,
+    isCompleted,
     description,
     techStack,
     responsibilities,
@@ -97,6 +100,7 @@ export async function updateContentBlock(id: string, formData: FormData) {
       deadline: deadline ? new Date(deadline) : null,
       order,
       isPublished,
+      isCompleted,
     },
   });
 

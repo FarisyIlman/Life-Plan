@@ -164,6 +164,18 @@ export default function NewContentBlockForm({
         </label>
       </div>
 
+      <div className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          name="isCompleted"
+          id="isCompleted"
+          value="true"
+        />
+        <label htmlFor="isCompleted" className="text-text-muted text-sm">
+          Completed
+        </label>
+      </div>
+
       <button
         type="submit"
         disabled={loading}

@@ -16,6 +16,7 @@ export const contentBlockSchema = z.object({
   deadline: z.string().optional(),
   order: z.coerce.number().int().default(0),
   isPublished: z.coerce.boolean().default(false),
+  isCompleted: z.coerce.boolean().default(false),
 });
 
 export type ContentBlockInput = z.infer<typeof contentBlockSchema>;
