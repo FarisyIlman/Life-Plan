@@ -21,7 +21,7 @@ export default function CardMonthlyTheme({ block }: { block: ContentBlock }) {
     >
       {block.deadline && (
         <p className="text-monthly-blue text-xs mb-1 font-heading">
-          {new Date(block.deadline).toLocaleDateString()}
+          {new Date(block.deadline).toLocaleDateString("en-GB")}
         </p>
       )}
 

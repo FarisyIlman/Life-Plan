@@ -118,6 +118,20 @@ export default function MonthlyEraView({
                 </div>
               );
             })}
+
+            {/* Unscheduled blocks — no month assigned */}
+            {blocksByMonth[0] && blocksByMonth[0].length > 0 && (
+              <div>
+                <h3 className="font-heading text-xl text-text-muted mb-3 border-b border-border pb-2">
+                  Unscheduled
+                </h3>
+                <div className="space-y-3">
+                  {blocksByMonth[0].map((block) => (
+                    <CardMonthlyTheme key={block.id} block={block} />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </section>

@@ -40,7 +40,7 @@ export default async function ContentBlocksPage() {
               <td className="py-3">{block.title}</td>
               <td className="py-3 text-text-muted">
                 {block.deadline
-                  ? new Date(block.deadline).toLocaleDateString()
+                  ? new Date(block.deadline).toLocaleDateString("en-GB")
                   : "-"}
               </td>
               <td className="py-3">

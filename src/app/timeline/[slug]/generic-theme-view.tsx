@@ -130,7 +130,7 @@ export default function GenericThemeView({
                       className="text-xs mb-1 font-heading"
                       style={{ color: style.accent }}
                     >
-                      {new Date(block.deadline).toLocaleDateString()}
+                      {new Date(block.deadline).toLocaleDateString("en-GB")}
                     </p>
                   )}
                   <h3 className="font-heading text-lg text-text-primary mb-1">

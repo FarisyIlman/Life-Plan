@@ -25,7 +25,7 @@ export default async function LogsPage() {
           {logs.map((log) => (
             <tr key={log.id} className="border-b border-border text-sm">
               <td className="py-3 text-text-muted">
-                {new Date(log.createdAt).toLocaleString()}
+                {new Date(log.createdAt).toLocaleString("en-GB")}
               </td>
               <td className="py-3">{log.admin.name}</td>
               <td className="py-3">

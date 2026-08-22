@@ -23,7 +23,7 @@ export default function CardGalaxyTheme({ block }: { block: ContentBlock }) {
 
       {block.deadline && (
         <p className="text-galaxy-gold text-xs mb-2 font-heading tracking-wide">
-          Deadline: {new Date(block.deadline).toLocaleDateString()}
+          Deadline: {new Date(block.deadline).toLocaleDateString("en-GB")}
         </p>
       )}
 
