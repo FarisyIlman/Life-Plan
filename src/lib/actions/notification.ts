@@ -1,6 +1,8 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/../auth";
+import { revalidatePath } from "next/cache";
 
 export async function generateDeadlineNotifications() {
   const now = new Date();
@@ -33,7 +35,6 @@ export async function generateDeadlineNotifications() {
 
     if (!type) continue;
 
-    // Avoid duplicate notifications of the same type for the same block
     const existing = await prisma.notification.findFirst({
       where: { contentBlockId: block.id, type },
     });
@@ -55,8 +56,13 @@ export async function generateDeadlineNotifications() {
 }
 
 export async function markNotificationRead(id: string) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+
   await prisma.notification.update({
     where: { id },
     data: { isRead: true },
   });
+
+  revalidatePath("/admin/notifications");
 }
