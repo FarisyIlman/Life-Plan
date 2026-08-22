@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import GalaxyEraView from "./galaxy-era-view";
 import MonthlyEraView from "./monthly-era-view";
+import GenericThemeView from "./generic-theme-view";
 
 export async function generateMetadata({
   params,
@@ -54,7 +55,11 @@ export default async function EraDetailPage({
       return <GalaxyEraView era={era} prevEra={prevEra} nextEra={nextEra} />;
     case "MONTHLY":
       return <MonthlyEraView era={era} prevEra={prevEra} nextEra={nextEra} />;
+    case "RACING":
+    case "VOYAGE":
+    case "TREE":
+      return <GenericThemeView era={era} prevEra={prevEra} nextEra={nextEra} />;
     default:
-      return <GalaxyEraView era={era} prevEra={prevEra} nextEra={nextEra} />;
+      return <GenericThemeView era={era} prevEra={prevEra} nextEra={nextEra} />;
   }
 }
