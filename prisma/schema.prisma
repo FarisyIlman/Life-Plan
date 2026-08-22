@@ -139,6 +139,7 @@ model Notification {
 
   createdAt       DateTime @default(now())
 
+  @@unique([contentBlockId, type])
   @@index([isRead])
   @@map("notifications")
 }

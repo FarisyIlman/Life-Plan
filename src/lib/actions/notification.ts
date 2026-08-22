@@ -35,21 +35,26 @@ export async function generateDeadlineNotifications() {
 
     if (!type) continue;
 
-    const existing = await prisma.notification.findFirst({
-      where: { contentBlockId: block.id, type },
-    });
-
-    if (existing) continue;
-
-    await prisma.notification.create({
-      data: {
+    const result = await prisma.notification.upsert({
+      where: {
+        contentBlockId_type: {
+          contentBlockId: block.id,
+          type,
+        },
+      },
+      update: {}, // already exists, do nothing
+      create: {
         contentBlockId: block.id,
         type,
         message: `"${block.title}" is due on ${deadline.toLocaleDateString()}`,
       },
     });
 
-    created++;
+    // Only count as "created" if this was a fresh insert.
+    // Prisma upsert doesn't directly tell us this, so we check createdAt vs now.
+    if (result.createdAt.getTime() > now.getTime() - 5000) {
+      created++;
+    }
   }
 
   return { created };
