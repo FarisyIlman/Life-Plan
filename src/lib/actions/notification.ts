@@ -46,7 +46,7 @@ export async function generateDeadlineNotifications() {
       create: {
         contentBlockId: block.id,
         type,
-        message: `"${block.title}" is due on ${deadline.toLocaleDateString()}`,
+        message: `"${block.title}" is due on ${deadline.toLocaleDateString("en-GB")}`,
       },
     });
 
