@@ -32,6 +32,12 @@ export default function NewEraPage() {
       <h1 className="font-heading text-3xl mb-6">New Era</h1>
 
       <form action={handleSubmit} className="max-w-lg space-y-4">
+        {errors._form && (
+          <p className="text-red-400 text-sm bg-red-400/10 border border-red-400/30 rounded p-3">
+            {errors._form[0]}
+          </p>
+        )}
+
         <div>
           <label className="block text-text-muted text-sm mb-1">Slug</label>
           <input

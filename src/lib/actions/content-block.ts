@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { contentBlockSchema } from "@/lib/validations/content-block";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/../auth";
+import { getPrismaErrorMessage } from "@/lib/prisma-error";
 
 function buildData(parsed: {
   description?: string;
@@ -45,22 +46,26 @@ export async function createContentBlock(formData: FormData) {
     month,
   } = parsed.data;
 
-  await prisma.contentBlock.create({
-    data: {
-      eraId,
-      type,
-      title,
-      subtitle: subtitle || null,
-      data: buildData({ description, techStack, responsibilities, month }),
-      deadline: deadline ? new Date(deadline) : null,
-      order,
-      isPublished,
-      isCompleted,
-    },
-  });
+  try {
+    await prisma.contentBlock.create({
+      data: {
+        eraId,
+        type,
+        title,
+        subtitle: subtitle || null,
+        data: buildData({ description, techStack, responsibilities, month }),
+        deadline: deadline ? new Date(deadline) : null,
+        order,
+        isPublished,
+        isCompleted,
+      },
+    });
 
-  revalidatePath("/admin/content-blocks");
-  return { success: true };
+    revalidatePath("/admin/content-blocks");
+    return { success: true };
+  } catch (error) {
+    return { error: { _form: [getPrismaErrorMessage(error)] } };
+  }
 }
 
 export async function updateContentBlock(id: string, formData: FormData) {
@@ -89,31 +94,39 @@ export async function updateContentBlock(id: string, formData: FormData) {
     month,
   } = parsed.data;
 
-  await prisma.contentBlock.update({
-    where: { id },
-    data: {
-      eraId,
-      type,
-      title,
-      subtitle: subtitle || null,
-      data: buildData({ description, techStack, responsibilities, month }),
-      deadline: deadline ? new Date(deadline) : null,
-      order,
-      isPublished,
-      isCompleted,
-    },
-  });
+  try {
+    await prisma.contentBlock.update({
+      where: { id },
+      data: {
+        eraId,
+        type,
+        title,
+        subtitle: subtitle || null,
+        data: buildData({ description, techStack, responsibilities, month }),
+        deadline: deadline ? new Date(deadline) : null,
+        order,
+        isPublished,
+        isCompleted,
+      },
+    });
 
-  revalidatePath("/admin/content-blocks");
-  return { success: true };
+    revalidatePath("/admin/content-blocks");
+    return { success: true };
+  } catch (error) {
+    return { error: { _form: [getPrismaErrorMessage(error)] } };
+  }
 }
 
 export async function deleteContentBlock(id: string) {
   const session = await auth();
   if (!session?.user) throw new Error("Unauthorized");
 
-  await prisma.contentBlock.delete({ where: { id } });
+  try {
+    await prisma.contentBlock.delete({ where: { id } });
 
-  revalidatePath("/admin/content-blocks");
-  return { success: true };
+    revalidatePath("/admin/content-blocks");
+    return { success: true };
+  } catch (error) {
+    return { error: { _form: [getPrismaErrorMessage(error)] } };
+  }
 }
