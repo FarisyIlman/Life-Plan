@@ -130,3 +130,24 @@ export async function deleteContentBlock(id: string) {
     return { error: { _form: [getPrismaErrorMessage(error)] } };
   }
 }
+
+export async function toggleContentBlockComplete(id: string) {
+  const session = await auth();
+  if (!session?.user) throw new Error("Unauthorized");
+
+  try {
+    const block = await prisma.contentBlock.findUnique({ where: { id } });
+    if (!block) return { error: { _form: ["Content block not found."] } };
+
+    await prisma.contentBlock.update({
+      where: { id },
+      data: { isCompleted: !block.isCompleted },
+    });
+
+    revalidatePath("/admin/content-blocks");
+    revalidatePath("/admin/dashboard");
+    return { success: true };
+  } catch (error) {
+    return { error: { _form: [getPrismaErrorMessage(error)] } };
+  }
+}
