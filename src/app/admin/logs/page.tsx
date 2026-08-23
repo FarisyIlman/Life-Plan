@@ -1,6 +1,11 @@
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/../auth";
+import { redirect } from "next/navigation";
 
 export default async function LogsPage() {
+  const session = await auth();
+  if (!session?.user) redirect("/admin/login");
+
   const logs = await prisma.activityLog.findMany({
     orderBy: { createdAt: "desc" },
     take: 100,

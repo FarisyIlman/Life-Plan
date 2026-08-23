@@ -1,3 +1,5 @@
+import { auth } from "@/../auth";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import EditEraForm from "./edit-form";
@@ -7,6 +9,9 @@ export default async function EditEraPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const session = await auth();
+  if (!session?.user) redirect("/admin/login");
+
   const { id } = await params;
   const era = await prisma.era.findUnique({ where: { id } });
 

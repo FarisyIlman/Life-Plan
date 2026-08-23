@@ -1,8 +1,13 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import { auth } from "@/../auth";
+import { redirect } from "next/navigation";
 import DeleteContentBlockButton from "./delete-button";
 
 export default async function ContentBlocksPage() {
+  const session = await auth();
+  if (!session?.user) redirect("/admin/login");
+
   const blocks = await prisma.contentBlock.findMany({
     orderBy: [{ eraId: "asc" }, { order: "asc" }],
     include: { era: true },

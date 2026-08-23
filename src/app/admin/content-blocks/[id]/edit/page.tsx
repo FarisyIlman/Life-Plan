@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
+import { auth } from "@/../auth";
+import { redirect } from "next/navigation";
 import EditContentBlockForm from "./edit-form";
 
 export default async function EditContentBlockPage({
@@ -7,6 +9,9 @@ export default async function EditContentBlockPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const session = await auth();
+  if (!session?.user) redirect("/admin/login");
+
   const { id } = await params;
 
   const [block, eras] = await Promise.all([

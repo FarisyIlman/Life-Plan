@@ -1,8 +1,13 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import { auth } from "@/../auth";
+import { redirect } from "next/navigation";
 import DeleteEraButton from "./delete-button";
 
 export default async function ErasPage() {
+  const session = await auth();
+  if (!session?.user) redirect("/admin/login");
+
   const eras = await prisma.era.findMany({
     orderBy: { order: "asc" },
   });

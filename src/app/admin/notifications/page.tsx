@@ -1,7 +1,12 @@
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/../auth";
+import { redirect } from "next/navigation";
 import MarkReadButton from "./mark-read-button";
 
 export default async function NotificationsPage() {
+  const session = await auth();
+  if (!session?.user) redirect("/admin/login");
+
   const notifications = await prisma.notification.findMany({
     orderBy: { createdAt: "desc" },
     include: { contentBlock: { select: { title: true } } },
@@ -35,7 +40,7 @@ export default async function NotificationsPage() {
               </span>
               <p className="text-text-primary text-sm mt-1">{notif.message}</p>
               <p className="text-text-muted text-xs mt-1">
-                {new Date(notif.createdAt).toLocaleString()}
+                {new Date(notif.createdAt).toLocaleString("en-GB")}
               </p>
             </div>
             {!notif.isRead && <MarkReadButton id={notif.id} />}
