@@ -13,7 +13,12 @@ export const contentBlockSchema = z.object({
     .optional()
     .transform((val) => (val && val !== "" ? parseInt(val, 10) : undefined))
     .pipe(z.number().int().min(1).max(12).optional()),
-  deadline: z.string().optional(),
+  deadline: z
+    .string()
+    .optional()
+    .refine((val) => !val || val === "" || !isNaN(new Date(val).getTime()), {
+      message: "Invalid deadline date",
+    }),
   order: z.coerce.number().int().default(0),
   isPublished: z.coerce.boolean().default(false),
   isCompleted: z.coerce.boolean().default(false),
