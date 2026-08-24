@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { auth } from "@/../auth";
 import { redirect } from "next/navigation";
-import DeleteEraButton from "./delete-button";
+import EraList from "./era-list";
 
 export default async function ErasPage() {
   const session = await auth();
@@ -24,52 +24,11 @@ export default async function ErasPage() {
         </Link>
       </div>
 
-      <table className="w-full border-collapse">
-        <thead>
-          <tr className="border-b border-border text-text-muted text-left text-sm">
-            <th className="py-2">Order</th>
-            <th className="py-2">Title</th>
-            <th className="py-2">Slug</th>
-            <th className="py-2">Theme</th>
-            <th className="py-2">Years</th>
-            <th className="py-2">Status</th>
-            <th className="py-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {eras.map((era) => (
-            <tr key={era.id} className="border-b border-border">
-              <td className="py-3">{era.order}</td>
-              <td className="py-3">{era.title}</td>
-              <td className="py-3 text-text-muted">{era.slug}</td>
-              <td className="py-3">{era.theme}</td>
-              <td className="py-3">
-                {era.startYear === era.endYear
-                  ? era.startYear
-                  : `${era.startYear}–${era.endYear}`}
-              </td>
-              <td className="py-3">
-                <span
-                  className={
-                    era.isPublished ? "text-green-400" : "text-text-muted"
-                  }
-                >
-                  {era.isPublished ? "Published" : "Draft"}
-                </span>
-              </td>
-              <td className="py-3 space-x-3">
-                <Link
-                  href={`/admin/eras/${era.id}/edit`}
-                  className="text-accent hover:underline"
-                >
-                  Edit
-                </Link>
-                <DeleteEraButton id={era.id} />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <p className="text-text-muted text-sm mb-4">
+        Drag rows by the ⋮⋮ handle to reorder eras.
+      </p>
+
+      <EraList eras={eras} />
 
       {eras.length === 0 && (
         <p className="text-text-muted mt-8">

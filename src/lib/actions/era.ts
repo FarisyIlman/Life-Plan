@@ -92,3 +92,21 @@ export async function deleteEra(id: string) {
     return { error: { _form: [getPrismaErrorMessage(error)] } };
   }
 }
+
+export async function reorderEras(orderedIds: string[]) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+
+  try {
+    await Promise.all(
+      orderedIds.map((id, index) =>
+        prisma.era.update({ where: { id }, data: { order: index } }),
+      ),
+    );
+
+    revalidatePath("/admin/eras");
+    return { success: true };
+  } catch (error) {
+    return { error: { _form: [getPrismaErrorMessage(error)] } };
+  }
+}
