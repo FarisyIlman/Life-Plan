@@ -5,22 +5,38 @@ import { redirect } from "next/navigation";
 import DeleteContentBlockButton from "./delete-button";
 import ToggleCompleteButton from "./toggle-complete-button";
 
+const THEMES = ["GALAXY", "MONTHLY", "RACING", "VOYAGE", "TREE"] as const;
+
 export default async function ContentBlocksPage({
   searchParams,
 }: {
-  searchParams: Promise<{ filter?: string }>;
+  searchParams: Promise<{
+    filter?: string;
+    q?: string;
+    eraId?: string;
+    theme?: string;
+    published?: string;
+  }>;
 }) {
   const session = await auth();
   if (!session?.user) redirect("/admin/login");
 
-  const { filter } = await searchParams;
+  const { filter, q, eraId, theme, published } = await searchParams;
 
-  const where =
-    filter === "completed"
-      ? { isCompleted: true }
-      : filter === "pending"
-        ? { isCompleted: false }
-        : {};
+  const eras = await prisma.era.findMany({
+    orderBy: { order: "asc" },
+    select: { id: true, title: true, theme: true },
+  });
+
+  const where: Record<string, unknown> = {};
+
+  if (filter === "completed") where.isCompleted = true;
+  if (filter === "pending") where.isCompleted = false;
+  if (q) where.title = { contains: q, mode: "insensitive" };
+  if (eraId) where.eraId = eraId;
+  if (published === "true") where.isPublished = true;
+  if (published === "false") where.isPublished = false;
+  if (theme) where.era = { theme };
 
   const blocks = await prisma.contentBlock.findMany({
     where,
@@ -28,7 +44,6 @@ export default async function ContentBlocksPage({
     include: { era: true },
   });
 
-  // Progress per era (based on ALL blocks, not filtered)
   const allBlocks = await prisma.contentBlock.findMany({
     include: { era: { select: { title: true, id: true } } },
   });
@@ -51,6 +66,19 @@ export default async function ContentBlocksPage({
     entry.total++;
     if (block.isCompleted) entry.completed++;
   }
+
+  // Helper to build query strings preserving other active filters
+  const buildQuery = (overrides: Record<string, string | undefined>) => {
+    const params = new URLSearchParams();
+    const merged = { filter, q, eraId, theme, published, ...overrides };
+    Object.entries(merged).forEach(([key, value]) => {
+      if (value) params.set(key, value);
+    });
+    const qs = params.toString();
+    return qs ? `/admin/content-blocks?${qs}` : "/admin/content-blocks";
+  };
+
+  const hasActiveFilters = !!(filter || q || eraId || theme || published);
 
   return (
     <main className="min-h-screen bg-bg-primary text-text-primary p-8">
@@ -93,38 +121,168 @@ export default async function ContentBlocksPage({
         </div>
       )}
 
-      {/* Filter tabs */}
-      <div className="flex gap-2 mb-6">
-        <Link
-          href="/admin/content-blocks"
-          className={`px-3 py-1.5 rounded text-sm ${
-            !filter
-              ? "bg-accent text-white"
-              : "bg-bg-secondary text-text-muted hover:text-text-primary"
-          }`}
+      {/* Search bar */}
+      <form action="/admin/content-blocks" method="get" className="mb-4">
+        {eraId && <input type="hidden" name="eraId" value={eraId} />}
+        {theme && <input type="hidden" name="theme" value={theme} />}
+        {published && (
+          <input type="hidden" name="published" value={published} />
+        )}
+        {filter && <input type="hidden" name="filter" value={filter} />}
+        <input
+          type="text"
+          name="q"
+          defaultValue={q || ""}
+          placeholder="Search by title..."
+          className="w-full max-w-md p-2 rounded bg-bg-secondary border border-border text-text-primary"
+        />
+      </form>
+
+      {/* Filter dropdowns */}
+      <div className="flex gap-3 mb-4 flex-wrap items-center">
+        <select
+          onChange={undefined}
+          defaultValue={eraId || ""}
+          className="p-2 rounded bg-bg-secondary border border-border text-text-primary text-sm"
+          disabled
         >
-          All
-        </Link>
-        <Link
-          href="/admin/content-blocks?filter=pending"
-          className={`px-3 py-1.5 rounded text-sm ${
-            filter === "pending"
-              ? "bg-accent text-white"
-              : "bg-bg-secondary text-text-muted hover:text-text-primary"
-          }`}
-        >
-          Pending
-        </Link>
-        <Link
-          href="/admin/content-blocks?filter=completed"
-          className={`px-3 py-1.5 rounded text-sm ${
-            filter === "completed"
-              ? "bg-accent text-white"
-              : "bg-bg-secondary text-text-muted hover:text-text-primary"
-          }`}
-        >
-          Completed
-        </Link>
+          <option value="">All Eras</option>
+        </select>
+
+        {/* Era filter links (avoids needing client JS for dropdown behavior) */}
+        <div className="flex gap-1 flex-wrap">
+          <Link
+            href={buildQuery({ eraId: undefined })}
+            className={`px-3 py-1.5 rounded text-xs ${
+              !eraId
+                ? "bg-accent text-white"
+                : "bg-bg-secondary text-text-muted hover:text-text-primary"
+            }`}
+          >
+            All Eras
+          </Link>
+          {eras.map((era) => (
+            <Link
+              key={era.id}
+              href={buildQuery({ eraId: era.id })}
+              className={`px-3 py-1.5 rounded text-xs ${
+                eraId === era.id
+                  ? "bg-accent text-white"
+                  : "bg-bg-secondary text-text-muted hover:text-text-primary"
+              }`}
+            >
+              {era.title}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex gap-3 mb-4 flex-wrap">
+        {/* Theme filter */}
+        <div className="flex gap-1 flex-wrap">
+          <Link
+            href={buildQuery({ theme: undefined })}
+            className={`px-3 py-1.5 rounded text-xs ${
+              !theme
+                ? "bg-accent text-white"
+                : "bg-bg-secondary text-text-muted hover:text-text-primary"
+            }`}
+          >
+            All Themes
+          </Link>
+          {THEMES.map((t) => (
+            <Link
+              key={t}
+              href={buildQuery({ theme: t })}
+              className={`px-3 py-1.5 rounded text-xs ${
+                theme === t
+                  ? "bg-accent text-white"
+                  : "bg-bg-secondary text-text-muted hover:text-text-primary"
+              }`}
+            >
+              {t}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex gap-3 mb-6 flex-wrap">
+        {/* Publish status filter */}
+        <div className="flex gap-1">
+          <Link
+            href={buildQuery({ published: undefined })}
+            className={`px-3 py-1.5 rounded text-xs ${
+              !published
+                ? "bg-accent text-white"
+                : "bg-bg-secondary text-text-muted hover:text-text-primary"
+            }`}
+          >
+            All
+          </Link>
+          <Link
+            href={buildQuery({ published: "true" })}
+            className={`px-3 py-1.5 rounded text-xs ${
+              published === "true"
+                ? "bg-accent text-white"
+                : "bg-bg-secondary text-text-muted hover:text-text-primary"
+            }`}
+          >
+            Published
+          </Link>
+          <Link
+            href={buildQuery({ published: "false" })}
+            className={`px-3 py-1.5 rounded text-xs ${
+              published === "false"
+                ? "bg-accent text-white"
+                : "bg-bg-secondary text-text-muted hover:text-text-primary"
+            }`}
+          >
+            Draft
+          </Link>
+        </div>
+
+        {/* Completion filter */}
+        <div className="flex gap-1">
+          <Link
+            href={buildQuery({ filter: undefined })}
+            className={`px-3 py-1.5 rounded text-xs ${
+              !filter
+                ? "bg-accent text-white"
+                : "bg-bg-secondary text-text-muted hover:text-text-primary"
+            }`}
+          >
+            All Status
+          </Link>
+          <Link
+            href={buildQuery({ filter: "pending" })}
+            className={`px-3 py-1.5 rounded text-xs ${
+              filter === "pending"
+                ? "bg-accent text-white"
+                : "bg-bg-secondary text-text-muted hover:text-text-primary"
+            }`}
+          >
+            Pending
+          </Link>
+          <Link
+            href={buildQuery({ filter: "completed" })}
+            className={`px-3 py-1.5 rounded text-xs ${
+              filter === "completed"
+                ? "bg-accent text-white"
+                : "bg-bg-secondary text-text-muted hover:text-text-primary"
+            }`}
+          >
+            Completed
+          </Link>
+        </div>
+
+        {hasActiveFilters && (
+          <Link
+            href="/admin/content-blocks"
+            className="px-3 py-1.5 rounded text-xs text-red-400 hover:underline"
+          >
+            Clear all filters
+          </Link>
+        )}
       </div>
 
       <table className="w-full border-collapse">
@@ -181,9 +339,7 @@ export default async function ContentBlocksPage({
 
       {blocks.length === 0 && (
         <p className="text-text-muted mt-8">
-          {filter
-            ? `No ${filter} content blocks found.`
-            : "No content blocks yet. Create your first one."}
+          No content blocks match your filters.
         </p>
       )}
     </main>
