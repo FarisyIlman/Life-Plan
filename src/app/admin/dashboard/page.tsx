@@ -140,6 +140,12 @@ export default async function DashboardPage() {
         >
           View Notifications →
         </Link>
+        <Link
+          href="/admin/calendar"
+          className="text-accent hover:underline text-sm"
+        >
+          Calendar & Deadlines →
+        </Link>
       </div>
     </main>
   );
