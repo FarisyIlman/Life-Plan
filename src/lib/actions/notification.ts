@@ -72,3 +72,16 @@ export async function markNotificationRead(id: string) {
 
   revalidatePath("/admin/notifications");
 }
+
+export async function markAllNotificationsRead() {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+
+  await prisma.notification.updateMany({
+    where: { isRead: false },
+    data: { isRead: true },
+  });
+
+  revalidatePath("/admin/notifications");
+  revalidatePath("/admin");
+}

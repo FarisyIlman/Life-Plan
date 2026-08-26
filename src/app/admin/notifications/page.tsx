@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/../auth";
 import { redirect } from "next/navigation";
 import MarkReadButton from "./mark-read-button";
+import MarkAllReadButton from "./mark-all-read-button";
 
 export default async function NotificationsPage() {
   const session = await auth();
@@ -12,9 +13,14 @@ export default async function NotificationsPage() {
     include: { contentBlock: { select: { title: true } } },
   });
 
+  const hasUnread = notifications.some((n) => !n.isRead);
+
   return (
     <main className="min-h-screen bg-bg-primary text-text-primary p-8">
-      <h1 className="font-heading text-3xl mb-6">Notifications</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="font-heading text-3xl">Notifications</h1>
+        {hasUnread && <MarkAllReadButton />}
+      </div>
 
       <div className="space-y-3 max-w-2xl">
         {notifications.map((notif) => (

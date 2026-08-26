@@ -67,70 +67,74 @@ export default function ContentBlockList({
           <h3 className="font-heading text-lg text-text-primary mb-2">
             {era.title}
           </h3>
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="border-b border-border text-text-muted text-left text-sm">
-                {draggable && <th className="py-2 w-8">⋮⋮</th>}
-                <th className="py-2">Type</th>
-                <th className="py-2">Title</th>
-                <th className="py-2">Deadline</th>
-                <th className="py-2">Status</th>
-                <th className="py-2">Completed</th>
-                <th className="py-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((block) => (
-                <tr
-                  key={block.id}
-                  draggable={draggable}
-                  onDragStart={() => draggable && handleDragStart(block.id)}
-                  onDragOver={(e) =>
-                    draggable && handleDragOver(e, block.id, era.id)
-                  }
-                  onDragEnd={() => draggable && handleDragEnd(era.id)}
-                  className={`border-b border-border ${
-                    draggable ? "cursor-move" : ""
-                  } ${draggedId === block.id ? "opacity-40" : ""}`}
-                >
-                  {draggable && (
-                    <td className="py-3 text-text-muted select-none">⋮⋮</td>
-                  )}
-                  <td className="py-3">{block.type}</td>
-                  <td className="py-3">{block.title}</td>
-                  <td className="py-3 text-text-muted">
-                    {block.deadline
-                      ? new Date(block.deadline).toLocaleDateString("en-GB")
-                      : "-"}
-                  </td>
-                  <td className="py-3">
-                    <span
-                      className={
-                        block.isPublished ? "text-green-400" : "text-text-muted"
-                      }
-                    >
-                      {block.isPublished ? "Published" : "Draft"}
-                    </span>
-                  </td>
-                  <td className="py-3">
-                    <ToggleCompleteButton
-                      id={block.id}
-                      isCompleted={block.isCompleted}
-                    />
-                  </td>
-                  <td className="py-3 space-x-3">
-                    <Link
-                      href={`/admin/content-blocks/${block.id}/edit`}
-                      className="text-accent hover:underline"
-                    >
-                      Edit
-                    </Link>
-                    <DeleteContentBlockButton id={block.id} />
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse min-w-[700px]">
+              <thead>
+                <tr className="border-b border-border text-text-muted text-left text-sm">
+                  {draggable && <th className="py-2 w-8">⋮⋮</th>}
+                  <th className="py-2">Type</th>
+                  <th className="py-2">Title</th>
+                  <th className="py-2">Deadline</th>
+                  <th className="py-2">Status</th>
+                  <th className="py-2">Completed</th>
+                  <th className="py-2">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {items.map((block) => (
+                  <tr
+                    key={block.id}
+                    draggable={draggable}
+                    onDragStart={() => draggable && handleDragStart(block.id)}
+                    onDragOver={(e) =>
+                      draggable && handleDragOver(e, block.id, era.id)
+                    }
+                    onDragEnd={() => draggable && handleDragEnd(era.id)}
+                    className={`border-b border-border ${
+                      draggable ? "cursor-move" : ""
+                    } ${draggedId === block.id ? "opacity-40" : ""}`}
+                  >
+                    {draggable && (
+                      <td className="py-3 text-text-muted select-none">⋮⋮</td>
+                    )}
+                    <td className="py-3">{block.type}</td>
+                    <td className="py-3">{block.title}</td>
+                    <td className="py-3 text-text-muted">
+                      {block.deadline
+                        ? new Date(block.deadline).toLocaleDateString("en-GB")
+                        : "-"}
+                    </td>
+                    <td className="py-3">
+                      <span
+                        className={
+                          block.isPublished
+                            ? "text-green-400"
+                            : "text-text-muted"
+                        }
+                      >
+                        {block.isPublished ? "Published" : "Draft"}
+                      </span>
+                    </td>
+                    <td className="py-3">
+                      <ToggleCompleteButton
+                        id={block.id}
+                        isCompleted={block.isCompleted}
+                      />
+                    </td>
+                    <td className="py-3 space-x-3">
+                      <Link
+                        href={`/admin/content-blocks/${block.id}/edit`}
+                        className="text-accent hover:underline"
+                      >
+                        Edit
+                      </Link>
+                      <DeleteContentBlockButton id={block.id} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       ))}
     </div>
