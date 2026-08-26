@@ -151,3 +151,21 @@ export async function toggleContentBlockComplete(id: string) {
     return { error: { _form: [getPrismaErrorMessage(error)] } };
   }
 }
+
+export async function reorderContentBlocks(orderedIds: string[]) {
+  const session = await auth();
+  if (!session?.user) throw new Error("Unauthorized");
+
+  try {
+    await Promise.all(
+      orderedIds.map((id, index) =>
+        prisma.contentBlock.update({ where: { id }, data: { order: index } }),
+      ),
+    );
+
+    revalidatePath("/admin/content-blocks");
+    return { success: true };
+  } catch (error) {
+    return { error: { _form: [getPrismaErrorMessage(error)] } };
+  }
+}

@@ -2,8 +2,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { auth } from "@/../auth";
 import { redirect } from "next/navigation";
-import DeleteContentBlockButton from "./delete-button";
-import ToggleCompleteButton from "./toggle-complete-button";
+import ContentBlockList from "./content-block-list";
 
 const THEMES = ["GALAXY", "MONTHLY", "RACING", "VOYAGE", "TREE"] as const;
 
@@ -67,7 +66,6 @@ export default async function ContentBlocksPage({
     if (block.isCompleted) entry.completed++;
   }
 
-  // Helper to build query strings preserving other active filters
   const buildQuery = (overrides: Record<string, string | undefined>) => {
     const params = new URLSearchParams();
     const merged = { filter, q, eraId, theme, published, ...overrides };
@@ -140,16 +138,6 @@ export default async function ContentBlocksPage({
 
       {/* Filter dropdowns */}
       <div className="flex gap-3 mb-4 flex-wrap items-center">
-        <select
-          onChange={undefined}
-          defaultValue={eraId || ""}
-          className="p-2 rounded bg-bg-secondary border border-border text-text-primary text-sm"
-          disabled
-        >
-          <option value="">All Eras</option>
-        </select>
-
-        {/* Era filter links (avoids needing client JS for dropdown behavior) */}
         <div className="flex gap-1 flex-wrap">
           <Link
             href={buildQuery({ eraId: undefined })}
@@ -178,7 +166,6 @@ export default async function ContentBlocksPage({
       </div>
 
       <div className="flex gap-3 mb-4 flex-wrap">
-        {/* Theme filter */}
         <div className="flex gap-1 flex-wrap">
           <Link
             href={buildQuery({ theme: undefined })}
@@ -207,7 +194,6 @@ export default async function ContentBlocksPage({
       </div>
 
       <div className="flex gap-3 mb-6 flex-wrap">
-        {/* Publish status filter */}
         <div className="flex gap-1">
           <Link
             href={buildQuery({ published: undefined })}
@@ -241,7 +227,6 @@ export default async function ContentBlocksPage({
           </Link>
         </div>
 
-        {/* Completion filter */}
         <div className="flex gap-1">
           <Link
             href={buildQuery({ filter: undefined })}
@@ -285,62 +270,12 @@ export default async function ContentBlocksPage({
         )}
       </div>
 
-      <table className="w-full border-collapse">
-        <thead>
-          <tr className="border-b border-border text-text-muted text-left text-sm">
-            <th className="py-2">Era</th>
-            <th className="py-2">Type</th>
-            <th className="py-2">Title</th>
-            <th className="py-2">Deadline</th>
-            <th className="py-2">Status</th>
-            <th className="py-2">Completed</th>
-            <th className="py-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {blocks.map((block) => (
-            <tr key={block.id} className="border-b border-border">
-              <td className="py-3 text-text-muted">{block.era.title}</td>
-              <td className="py-3">{block.type}</td>
-              <td className="py-3">{block.title}</td>
-              <td className="py-3 text-text-muted">
-                {block.deadline
-                  ? new Date(block.deadline).toLocaleDateString("en-GB")
-                  : "-"}
-              </td>
-              <td className="py-3">
-                <span
-                  className={
-                    block.isPublished ? "text-green-400" : "text-text-muted"
-                  }
-                >
-                  {block.isPublished ? "Published" : "Draft"}
-                </span>
-              </td>
-              <td className="py-3">
-                <ToggleCompleteButton
-                  id={block.id}
-                  isCompleted={block.isCompleted}
-                />
-              </td>
-              <td className="py-3 space-x-3">
-                <Link
-                  href={`/admin/content-blocks/${block.id}/edit`}
-                  className="text-accent hover:underline"
-                >
-                  Edit
-                </Link>
-                <DeleteContentBlockButton id={block.id} />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {blocks.length === 0 && (
+      {blocks.length === 0 ? (
         <p className="text-text-muted mt-8">
           No content blocks match your filters.
         </p>
+      ) : (
+        <ContentBlockList blocks={blocks} draggable={!hasActiveFilters} />
       )}
     </main>
   );
