@@ -15,8 +15,9 @@ export default async function EditContentBlockPage({
   const { id } = await params;
 
   const [block, eras] = await Promise.all([
-    prisma.contentBlock.findUnique({ where: { id } }),
+    prisma.contentBlock.findUnique({ where: { id, deletedAt: null } }),
     prisma.era.findMany({
+      where: { deletedAt: null },
       orderBy: { order: "asc" },
       select: { id: true, title: true },
     }),

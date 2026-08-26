@@ -23,11 +23,12 @@ export default async function ContentBlocksPage({
   const { filter, q, eraId, theme, published } = await searchParams;
 
   const eras = await prisma.era.findMany({
+    where: { deletedAt: null },
     orderBy: { order: "asc" },
     select: { id: true, title: true, theme: true },
   });
 
-  const where: Record<string, unknown> = {};
+  const where: Record<string, unknown> = { deletedAt: null };
 
   if (filter === "completed") where.isCompleted = true;
   if (filter === "pending") where.isCompleted = false;
@@ -44,6 +45,7 @@ export default async function ContentBlocksPage({
   });
 
   const allBlocks = await prisma.contentBlock.findMany({
+    where: { deletedAt: null },
     include: { era: { select: { title: true, id: true } } },
   });
 

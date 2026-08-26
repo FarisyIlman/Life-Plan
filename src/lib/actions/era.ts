@@ -73,8 +73,10 @@ export async function deleteEra(id: string) {
   if (!session?.user?.id) throw new Error("Unauthorized");
 
   try {
-    const era = await prisma.era.findUnique({ where: { id } });
-    await prisma.era.delete({ where: { id } });
+    const era = await prisma.era.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
 
     await prisma.activityLog.create({
       data: {
@@ -87,6 +89,47 @@ export async function deleteEra(id: string) {
     });
 
     revalidatePath("/admin/eras");
+    return { success: true };
+  } catch (error) {
+    return { error: { _form: [getPrismaErrorMessage(error)] } };
+  }
+}
+
+export async function restoreEra(id: string) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+
+  try {
+    await prisma.era.update({
+      where: { id },
+      data: { deletedAt: null },
+    });
+
+    await prisma.activityLog.create({
+      data: {
+        adminId: session.user.id,
+        action: "RESTORE",
+        entityType: "Era",
+        entityId: id,
+        detail: {},
+      },
+    });
+
+    revalidatePath("/admin/eras");
+    revalidatePath("/admin/trash");
+    return { success: true };
+  } catch (error) {
+    return { error: { _form: [getPrismaErrorMessage(error)] } };
+  }
+}
+
+export async function permanentlyDeleteEra(id: string) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+
+  try {
+    await prisma.era.delete({ where: { id } });
+    revalidatePath("/admin/trash");
     return { success: true };
   } catch (error) {
     return { error: { _form: [getPrismaErrorMessage(error)] } };

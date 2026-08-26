@@ -14,6 +14,7 @@ export async function generateDeadlineNotifications() {
     where: {
       deadline: { not: null, gte: now, lte: in7Days },
       isCompleted: false,
+      deletedAt: null,
     },
   });
 

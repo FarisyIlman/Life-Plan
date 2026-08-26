@@ -11,7 +11,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const era = await prisma.era.findUnique({ where: { slug } });
+  const era = await prisma.era.findUnique({ where: { slug, deletedAt: null } });
 
   if (!era) return { title: "Not Found" };
 
@@ -29,10 +29,10 @@ export default async function EraDetailPage({
   const { slug } = await params;
 
   const era = await prisma.era.findUnique({
-    where: { slug },
+    where: { slug, deletedAt: null },
     include: {
       contentBlocks: {
-        where: { isPublished: true },
+        where: { isPublished: true, deletedAt: null },
         orderBy: { order: "asc" },
       },
     },
@@ -41,7 +41,7 @@ export default async function EraDetailPage({
   if (!era || !era.isPublished) notFound();
 
   const allEras = await prisma.era.findMany({
-    where: { isPublished: true },
+    where: { isPublished: true, deletedAt: null },
     orderBy: { order: "asc" },
     select: { slug: true, title: true, order: true },
   });

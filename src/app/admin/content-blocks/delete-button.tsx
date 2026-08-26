@@ -4,7 +4,9 @@ import { deleteContentBlock } from "@/lib/actions/content-block";
 
 export default function DeleteContentBlockButton({ id }: { id: string }) {
   const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this content block?")) {
+    if (
+      !confirm("Move this content block to trash? You can restore it later.")
+    ) {
       return;
     }
     await deleteContentBlock(id);

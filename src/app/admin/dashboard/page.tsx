@@ -14,19 +14,25 @@ export default async function DashboardPage() {
     upcomingDeadlines,
     allBlocks,
   ] = await Promise.all([
-    prisma.era.count(),
-    prisma.contentBlock.count({ where: { isPublished: true } }),
-    prisma.contentBlock.count({ where: { isPublished: false } }),
+    prisma.era.count({ where: { deletedAt: null } }),
+    prisma.contentBlock.count({
+      where: { isPublished: true, deletedAt: null },
+    }),
+    prisma.contentBlock.count({
+      where: { isPublished: false, deletedAt: null },
+    }),
     prisma.contentBlock.findMany({
       where: {
         deadline: { gte: new Date() },
         isCompleted: false,
+        deletedAt: null,
       },
       orderBy: { deadline: "asc" },
       take: 5,
       include: { era: { select: { title: true } } },
     }),
     prisma.contentBlock.findMany({
+      where: { deletedAt: null },
       select: { isCompleted: true },
     }),
   ]);
@@ -145,6 +151,12 @@ export default async function DashboardPage() {
           className="text-accent hover:underline text-sm"
         >
           Calendar & Deadlines →
+        </Link>
+        <Link
+          href="/admin/trash"
+          className="text-accent hover:underline text-sm"
+        >
+          Trash →
         </Link>
       </div>
     </main>

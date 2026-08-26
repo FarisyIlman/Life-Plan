@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default async function TimelinePreview() {
   const eras = await prisma.era.findMany({
-    where: { isPublished: true },
+    where: { isPublished: true, deletedAt: null },
     orderBy: { order: "asc" },
   });
 

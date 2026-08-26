@@ -122,9 +122,43 @@ export async function deleteContentBlock(id: string) {
   if (!session?.user) throw new Error("Unauthorized");
 
   try {
-    await prisma.contentBlock.delete({ where: { id } });
+    await prisma.contentBlock.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
 
     revalidatePath("/admin/content-blocks");
+    return { success: true };
+  } catch (error) {
+    return { error: { _form: [getPrismaErrorMessage(error)] } };
+  }
+}
+
+export async function restoreContentBlock(id: string) {
+  const session = await auth();
+  if (!session?.user) throw new Error("Unauthorized");
+
+  try {
+    await prisma.contentBlock.update({
+      where: { id },
+      data: { deletedAt: null },
+    });
+
+    revalidatePath("/admin/content-blocks");
+    revalidatePath("/admin/trash");
+    return { success: true };
+  } catch (error) {
+    return { error: { _form: [getPrismaErrorMessage(error)] } };
+  }
+}
+
+export async function permanentlyDeleteContentBlock(id: string) {
+  const session = await auth();
+  if (!session?.user) throw new Error("Unauthorized");
+
+  try {
+    await prisma.contentBlock.delete({ where: { id } });
+    revalidatePath("/admin/trash");
     return { success: true };
   } catch (error) {
     return { error: { _form: [getPrismaErrorMessage(error)] } };
@@ -163,6 +197,57 @@ export async function reorderContentBlocks(orderedIds: string[]) {
       ),
     );
 
+    revalidatePath("/admin/content-blocks");
+    return { success: true };
+  } catch (error) {
+    return { error: { _form: [getPrismaErrorMessage(error)] } };
+  }
+}
+
+export async function bulkPublishContentBlocks(
+  ids: string[],
+  publish: boolean,
+) {
+  const session = await auth();
+  if (!session?.user) throw new Error("Unauthorized");
+
+  try {
+    await prisma.contentBlock.updateMany({
+      where: { id: { in: ids } },
+      data: { isPublished: publish },
+    });
+    revalidatePath("/admin/content-blocks");
+    return { success: true };
+  } catch (error) {
+    return { error: { _form: [getPrismaErrorMessage(error)] } };
+  }
+}
+
+export async function bulkMarkComplete(ids: string[], completed: boolean) {
+  const session = await auth();
+  if (!session?.user) throw new Error("Unauthorized");
+
+  try {
+    await prisma.contentBlock.updateMany({
+      where: { id: { in: ids } },
+      data: { isCompleted: completed },
+    });
+    revalidatePath("/admin/content-blocks");
+    return { success: true };
+  } catch (error) {
+    return { error: { _form: [getPrismaErrorMessage(error)] } };
+  }
+}
+
+export async function bulkDeleteContentBlocks(ids: string[]) {
+  const session = await auth();
+  if (!session?.user) throw new Error("Unauthorized");
+
+  try {
+    await prisma.contentBlock.updateMany({
+      where: { id: { in: ids } },
+      data: { deletedAt: new Date() },
+    });
     revalidatePath("/admin/content-blocks");
     return { success: true };
   } catch (error) {

@@ -9,6 +9,7 @@ export default async function ErasPage() {
   if (!session?.user) redirect("/admin/login");
 
   const eras = await prisma.era.findMany({
+    where: { deletedAt: null },
     orderBy: { order: "asc" },
   });
 

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default async function TimelinePage() {
   const eras = await prisma.era.findMany({
-    where: { isPublished: true },
+    where: { isPublished: true, deletedAt: null },
     orderBy: { order: "asc" },
   });
 

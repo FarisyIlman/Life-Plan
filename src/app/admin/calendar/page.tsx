@@ -18,7 +18,7 @@ export default async function CalendarPage({
   const month = params.month ? parseInt(params.month, 10) : now.getMonth(); // 0-indexed
 
   const blocks = await prisma.contentBlock.findMany({
-    where: { deadline: { not: null } },
+    where: { deadline: { not: null }, deletedAt: null },
     include: { era: { select: { title: true } } },
     orderBy: { deadline: "asc" },
   });

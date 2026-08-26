@@ -4,11 +4,7 @@ import { deleteEra } from "@/lib/actions/era";
 
 export default function DeleteEraButton({ id }: { id: string }) {
   const handleDelete = async () => {
-    if (
-      !confirm(
-        "Are you sure you want to delete this era? This cannot be undone.",
-      )
-    ) {
+    if (!confirm("Move this era to trash? You can restore it later.")) {
       return;
     }
     await deleteEra(id);
