@@ -14,8 +14,18 @@ export default async function CalendarPage({
 
   const params = await searchParams;
   const now = new Date();
-  const year = params.year ? parseInt(params.year, 10) : now.getFullYear();
-  const month = params.month ? parseInt(params.month, 10) : now.getMonth(); // 0-indexed
+
+  const parsedYear = params.year ? parseInt(params.year, 10) : NaN;
+  const year =
+    !isNaN(parsedYear) && parsedYear >= 1970 && parsedYear <= 2200
+      ? parsedYear
+      : now.getFullYear();
+
+  const parsedMonth = params.month ? parseInt(params.month, 10) : NaN;
+  const month =
+    !isNaN(parsedMonth) && parsedMonth >= 0 && parsedMonth <= 11
+      ? parsedMonth
+      : now.getMonth();
 
   const blocks = await prisma.contentBlock.findMany({
     where: { deadline: { not: null }, deletedAt: null },
@@ -158,7 +168,7 @@ export default async function CalendarPage({
                 ? `Due in ${range} day${range === "1" ? "" : "s"}`
                 : "All Deadlines"}
           </h2>
-          <div className="space-y-3 max-h-[600px] overflow-y-auto">
+          <div className="space-y-3 max-h-150 overflow-y-auto">
             {filteredBlocks.length === 0 ? (
               <p className="text-text-muted text-sm">Nothing here.</p>
             ) : (

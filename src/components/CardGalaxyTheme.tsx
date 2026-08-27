@@ -2,8 +2,13 @@
 
 import { motion } from "framer-motion";
 import type { ContentBlock } from "@prisma/client";
+import type { ContentBlockPreview } from "@/lib/types";
 
-export default function CardGalaxyTheme({ block }: { block: ContentBlock }) {
+export default function CardGalaxyTheme({
+  block,
+}: {
+  block: ContentBlock | ContentBlockPreview;
+}) {
   const data = block.data as {
     description?: string;
     techStack?: string;

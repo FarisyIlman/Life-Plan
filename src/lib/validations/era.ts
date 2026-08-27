@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { strictBoolean } from "./boolean";
 
 export const eraSchema = z
   .object({
@@ -14,7 +15,7 @@ export const eraSchema = z
     startYear: z.coerce.number().int().min(2020).max(2100),
     endYear: z.coerce.number().int().min(2020).max(2100),
     description: z.string().optional(),
-    isPublished: z.coerce.boolean().default(false),
+    isPublished: strictBoolean,
     order: z.coerce.number().int().default(0),
   })
   .refine((data) => data.endYear >= data.startYear, {

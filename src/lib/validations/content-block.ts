@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { strictBoolean } from "./boolean";
 
 export const contentBlockSchema = z.object({
   eraId: z.string().min(1, "Era is required"),
@@ -20,8 +21,8 @@ export const contentBlockSchema = z.object({
       message: "Invalid deadline date",
     }),
   order: z.coerce.number().int().default(0),
-  isPublished: z.coerce.boolean().default(false),
-  isCompleted: z.coerce.boolean().default(false),
+  isPublished: strictBoolean,
+  isCompleted: strictBoolean,
 });
 
 export type ContentBlockInput = z.infer<typeof contentBlockSchema>;

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { generateDeadlineNotifications } from "@/lib/actions/notification";
+import { generateDeadlineNotifications } from "@/lib/notifications";
 
 export async function GET(request: Request) {
   // Simple protection: require a secret in the query/header

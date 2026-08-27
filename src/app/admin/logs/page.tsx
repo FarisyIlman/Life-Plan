@@ -17,7 +17,7 @@ export default async function LogsPage() {
       <h1 className="font-heading text-3xl mb-6">Activity Logs</h1>
 
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse min-w-[600px]">
+        <table className="w-full border-collapse min-w-150">
           <thead>
             <tr className="border-b border-border text-text-muted text-left text-sm">
               <th className="py-2">Time</th>

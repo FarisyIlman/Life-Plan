@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Era, ContentBlock } from "@prisma/client";
 import { restoreEra, permanentlyDeleteEra } from "@/lib/actions/era";
@@ -18,20 +19,43 @@ export default function TrashList({
   blocks: BlockWithEra[];
 }) {
   const router = useRouter();
+  const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleRestoreEra = async (id: string) => {
-    await restoreEra(id);
+    setLoadingId(id);
+    setError(null);
+    const res = await restoreEra(id);
+    setLoadingId(null);
+    if (res?.error) {
+      setError(res.error._form?.[0] || "Failed to restore era.");
+      return;
+    }
     router.refresh();
   };
 
   const handlePermanentEra = async (id: string) => {
     if (!confirm("Permanently delete this era? This cannot be undone.")) return;
-    await permanentlyDeleteEra(id);
+    setLoadingId(id);
+    setError(null);
+    const res = await permanentlyDeleteEra(id);
+    setLoadingId(null);
+    if (res?.error) {
+      setError(res.error._form?.[0] || "Failed to delete era.");
+      return;
+    }
     router.refresh();
   };
 
   const handleRestoreBlock = async (id: string) => {
-    await restoreContentBlock(id);
+    setLoadingId(id);
+    setError(null);
+    const res = await restoreContentBlock(id);
+    setLoadingId(null);
+    if (res?.error) {
+      setError(res.error._form?.[0] || "Failed to restore content block.");
+      return;
+    }
     router.refresh();
   };
 
@@ -40,12 +64,25 @@ export default function TrashList({
       !confirm("Permanently delete this content block? This cannot be undone.")
     )
       return;
-    await permanentlyDeleteContentBlock(id);
+    setLoadingId(id);
+    setError(null);
+    const res = await permanentlyDeleteContentBlock(id);
+    setLoadingId(null);
+    if (res?.error) {
+      setError(res.error._form?.[0] || "Failed to delete content block.");
+      return;
+    }
     router.refresh();
   };
 
   return (
     <div className="space-y-10">
+      {error && (
+        <p className="text-red-400 text-sm bg-red-400/10 border border-red-400/30 rounded p-3">
+          {error}
+        </p>
+      )}
+
       <div>
         <h2 className="font-heading text-xl mb-4">Deleted Eras</h2>
         {eras.length === 0 ? (
@@ -67,14 +104,16 @@ export default function TrashList({
                 </div>
                 <div className="space-x-3">
                   <button
+                    disabled={loadingId !== null}
                     onClick={() => handleRestoreEra(era.id)}
-                    className="text-accent hover:underline text-sm"
+                    className="text-accent hover:underline text-sm disabled:opacity-50"
                   >
-                    Restore
+                    {loadingId === era.id ? "..." : "Restore"}
                   </button>
                   <button
+                    disabled={loadingId !== null}
                     onClick={() => handlePermanentEra(era.id)}
-                    className="text-red-400 hover:underline text-sm"
+                    className="text-red-400 hover:underline text-sm disabled:opacity-50"
                   >
                     Delete Forever
                   </button>
@@ -106,14 +145,16 @@ export default function TrashList({
                 </div>
                 <div className="space-x-3">
                   <button
+                    disabled={loadingId !== null}
                     onClick={() => handleRestoreBlock(block.id)}
-                    className="text-accent hover:underline text-sm"
+                    className="text-accent hover:underline text-sm disabled:opacity-50"
                   >
-                    Restore
+                    {loadingId === block.id ? "..." : "Restore"}
                   </button>
                   <button
+                    disabled={loadingId !== null}
                     onClick={() => handlePermanentBlock(block.id)}
-                    className="text-red-400 hover:underline text-sm"
+                    className="text-red-400 hover:underline text-sm disabled:opacity-50"
                   >
                     Delete Forever
                   </button>

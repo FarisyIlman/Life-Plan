@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { updateContentBlock } from "@/lib/actions/content-block";
 import type { ContentBlock } from "@prisma/client";
 import CardGalaxyTheme from "@/components/CardGalaxyTheme";
+import type { ContentBlockPreview } from "@/lib/types";
 
 const TYPES = ["card", "monthly-card"] as const;
 
@@ -55,7 +56,7 @@ export default function EditContentBlockForm({
     router.push("/admin/content-blocks");
   };
 
-  const previewBlock = {
+  const previewBlock: ContentBlockPreview = {
     id: "preview",
     title: preview.title || "Untitled",
     subtitle: preview.subtitle || null,
@@ -66,7 +67,7 @@ export default function EditContentBlockForm({
       techStack: preview.techStack,
       responsibilities: preview.responsibilities,
     },
-  } as any;
+  };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

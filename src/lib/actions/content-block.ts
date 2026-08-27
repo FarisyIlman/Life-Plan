@@ -167,15 +167,25 @@ export async function permanentlyDeleteContentBlock(id: string) {
 
 export async function toggleContentBlockComplete(id: string) {
   const session = await auth();
-  if (!session?.user) throw new Error("Unauthorized");
+  if (!session?.user?.id) throw new Error("Unauthorized");
 
   try {
     const block = await prisma.contentBlock.findUnique({ where: { id } });
     if (!block) return { error: { _form: ["Content block not found."] } };
 
-    await prisma.contentBlock.update({
+    const updated = await prisma.contentBlock.update({
       where: { id },
       data: { isCompleted: !block.isCompleted },
+    });
+
+    await prisma.activityLog.create({
+      data: {
+        adminId: session.user.id,
+        action: updated.isCompleted ? "MARK_COMPLETE" : "MARK_PENDING",
+        entityType: "ContentBlock",
+        entityId: id,
+        detail: { title: block.title },
+      },
     });
 
     revalidatePath("/admin/content-blocks");
@@ -225,13 +235,24 @@ export async function bulkPublishContentBlocks(
 
 export async function bulkMarkComplete(ids: string[], completed: boolean) {
   const session = await auth();
-  if (!session?.user) throw new Error("Unauthorized");
+  if (!session?.user?.id) throw new Error("Unauthorized");
 
   try {
     await prisma.contentBlock.updateMany({
       where: { id: { in: ids } },
       data: { isCompleted: completed },
     });
+
+    await prisma.activityLog.create({
+      data: {
+        adminId: session.user.id,
+        action: completed ? "BULK_MARK_COMPLETE" : "BULK_MARK_PENDING",
+        entityType: "ContentBlock",
+        entityId: ids.join(","),
+        detail: { count: ids.length },
+      },
+    });
+
     revalidatePath("/admin/content-blocks");
     return { success: true };
   } catch (error) {

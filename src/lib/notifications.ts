@@ -1,9 +1,5 @@
-"use server";
-
-import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
-import { auth } from "@/../auth";
-import { revalidatePath } from "next/cache";
+import { prisma } from "@/lib/prisma";
 
 export async function generateDeadlineNotifications() {
   const now = new Date();
@@ -58,28 +54,4 @@ export async function generateDeadlineNotifications() {
   }
 
   return { created };
-}
-
-export async function markNotificationRead(id: string) {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized");
-
-  await prisma.notification.update({
-    where: { id },
-    data: { isRead: true },
-  });
-
-  revalidatePath("/admin/notifications");
-}
-
-export async function markAllNotificationsRead() {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized");
-
-  await prisma.notification.updateMany({
-    where: { isRead: false },
-    data: { isRead: true },
-  });
-
-  revalidatePath("/admin/notifications");
 }

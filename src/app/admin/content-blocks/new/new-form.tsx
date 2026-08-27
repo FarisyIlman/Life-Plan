@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createContentBlock } from "@/lib/actions/content-block";
 import CardGalaxyTheme from "@/components/CardGalaxyTheme";
+import type { ContentBlockPreview } from "@/lib/types";
 
 const TYPES = ["card", "monthly-card"] as const;
 
@@ -44,7 +45,7 @@ export default function NewContentBlockForm({
   };
 
   // Fake block object shaped like Prisma's ContentBlock, for the preview card
-  const previewBlock = {
+  const previewBlock: ContentBlockPreview = {
     id: "preview",
     title: preview.title || "Untitled",
     subtitle: preview.subtitle || null,
@@ -55,7 +56,7 @@ export default function NewContentBlockForm({
       techStack: preview.techStack,
       responsibilities: preview.responsibilities,
     },
-  } as any;
+  };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

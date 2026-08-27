@@ -68,7 +68,7 @@ export default function ContentBlockList({
             {era.title}
           </h3>
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse min-w-[700px]">
+            <table className="w-full border-collapse min-w-175">
               <thead>
                 <tr className="border-b border-border text-text-muted text-left text-sm">
                   {draggable && <th className="py-2 w-8">⋮⋮</th>}
