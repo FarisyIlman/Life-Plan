@@ -38,6 +38,12 @@ export default async function AdminLayout({
               Content
             </Link>
             <Link
+              href="/admin/achievements"
+              className="text-sm text-text-muted hover:text-accent whitespace-nowrap"
+            >
+              Achievements
+            </Link>
+            <Link
               href="/admin/calendar"
               className="text-sm text-text-muted hover:text-accent whitespace-nowrap"
             >
