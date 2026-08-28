@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import GalaxyEraView from "./galaxy-era-view";
 import MonthlyEraView from "./monthly-era-view";
+import RacingEraView from "./racing-era-view";
 import GenericThemeView from "./generic-theme-view";
 
 export async function generateMetadata({
@@ -35,6 +36,9 @@ export default async function EraDetailPage({
         where: { isPublished: true, deletedAt: null },
         orderBy: { order: "asc" },
       },
+      achievementGoals: {
+        orderBy: [{ year: "asc" }, { category: "asc" }],
+      },
     },
   });
 
@@ -56,6 +60,7 @@ export default async function EraDetailPage({
     case "MONTHLY":
       return <MonthlyEraView era={era} prevEra={prevEra} nextEra={nextEra} />;
     case "RACING":
+      return <RacingEraView era={era} prevEra={prevEra} nextEra={nextEra} />;
     case "VOYAGE":
     case "TREE":
       return <GenericThemeView era={era} prevEra={prevEra} nextEra={nextEra} />;
