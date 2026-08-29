@@ -77,20 +77,13 @@ export default function FlowchartEditor({
   const handleNodesChange = useCallback(
     (changes: NodeChange[]) => {
       onNodesChange(changes);
-
-      // Persist position changes on drag stop
-      changes.forEach((change) => {
-        if (
-          change.type === "position" &&
-          change.dragging === false &&
-          change.position
-        ) {
-          updateNodePosition(change.id, change.position.x, change.position.y);
-        }
-      });
     },
     [onNodesChange],
   );
+
+  const handleNodeDragStop = useCallback((_: React.MouseEvent, node: Node) => {
+    updateNodePosition(node.id, node.position.x, node.position.y);
+  }, []);
 
   const onConnect = useCallback(
     (connection: Connection) => setEdges((eds) => addEdge(connection, eds)),
@@ -183,6 +176,7 @@ export default function FlowchartEditor({
           onNodesChange={handleNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
+          onNodeDragStop={handleNodeDragStop}
           onNodeDoubleClick={(_, node) => handleDeleteSelected(node.id)}
           fitView
         >

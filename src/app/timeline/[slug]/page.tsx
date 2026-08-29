@@ -7,6 +7,8 @@ import RacingEraView from "./racing-era-view";
 import VoyageEraView from "./voyage-era-view";
 import TreeEraView from "./tree-era-view";
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({
   params,
 }: {
