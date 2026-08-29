@@ -4,7 +4,8 @@ import { notFound } from "next/navigation";
 import GalaxyEraView from "./galaxy-era-view";
 import MonthlyEraView from "./monthly-era-view";
 import RacingEraView from "./racing-era-view";
-import GenericThemeView from "./generic-theme-view";
+import VoyageEraView from "./voyage-era-view";
+import TreeEraView from "./tree-era-view";
 
 export async function generateMetadata({
   params,
@@ -61,10 +62,22 @@ export default async function EraDetailPage({
       return <MonthlyEraView era={era} prevEra={prevEra} nextEra={nextEra} />;
     case "RACING":
       return <RacingEraView era={era} prevEra={prevEra} nextEra={nextEra} />;
-    case "VOYAGE":
+    case "VOYAGE": {
+      const flowchartNodes = await prisma.masterDegreeNode.findMany({
+        orderBy: { createdAt: "asc" },
+      });
+      return (
+        <VoyageEraView
+          era={era}
+          prevEra={prevEra}
+          nextEra={nextEra}
+          flowchartNodes={flowchartNodes}
+        />
+      );
+    }
     case "TREE":
-      return <GenericThemeView era={era} prevEra={prevEra} nextEra={nextEra} />;
+      return <TreeEraView era={era} prevEra={prevEra} nextEra={nextEra} />;
     default:
-      return <GenericThemeView era={era} prevEra={prevEra} nextEra={nextEra} />;
+      return <TreeEraView era={era} prevEra={prevEra} nextEra={nextEra} />;
   }
 }
