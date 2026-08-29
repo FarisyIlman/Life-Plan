@@ -50,6 +50,12 @@ export default async function AdminLayout({
               Calendar
             </Link>
             <Link
+              href="/admin/master-degree"
+              className="text-sm text-text-muted hover:text-accent whitespace-nowrap"
+            >
+              Masters Flow
+            </Link>
+            <Link
               href="/admin/notifications"
               className="relative text-sm text-text-muted hover:text-accent whitespace-nowrap"
             >
