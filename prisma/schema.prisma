@@ -117,6 +117,9 @@ model AchievementGoal {
 enum AchievementCategory {
   SALARY
   SAVING
+  ACADEMIC
+  INVESTMENT
+  CERTIFICATION
 }
 
 enum AchievementStatus {

@@ -17,7 +17,7 @@ export default async function EditAchievementPage({
   const [goal, eras] = await Promise.all([
     prisma.achievementGoal.findUnique({ where: { id } }),
     prisma.era.findMany({
-      where: { deletedAt: null, theme: "RACING" },
+      where: { deletedAt: null },
       orderBy: { order: "asc" },
       select: { id: true, title: true },
     }),

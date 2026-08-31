@@ -4,13 +4,20 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createAchievementGoal } from "@/lib/actions/achievement-goal";
 
-const CATEGORIES = ["SALARY", "SAVING"] as const;
+const CATEGORIES = [
+  "SALARY",
+  "SAVING",
+  "ACADEMIC",
+  "INVESTMENT",
+  "CERTIFICATION",
+] as const;
 const STATUSES = [
   "PENDING",
   "UNDER_ACHIEVED",
   "ACHIEVED",
   "OVER_ACHIEVED",
 ] as const;
+const MONETARY_CATEGORIES = ["SALARY", "SAVING", "INVESTMENT"];
 
 export default function NewAchievementForm({
   eras,
@@ -20,6 +27,10 @@ export default function NewAchievementForm({
   const router = useRouter();
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>("SALARY");
+
+  const isMonetary = MONETARY_CATEGORIES.includes(selectedCategory);
+  const unitLabel = isMonetary ? " (Rp)" : "";
 
   const handleSubmit = async (formData: FormData) => {
     setLoading(true);
@@ -62,7 +73,7 @@ export default function NewAchievementForm({
         )}
         {eras.length === 0 && (
           <p className="text-galaxy-gold text-xs mt-1">
-            No RACING-themed era found. Create one first in Era Management.
+            No era found. Create one first in Era Management.
           </p>
         )}
       </div>
@@ -84,6 +95,8 @@ export default function NewAchievementForm({
         <label className="block text-text-muted text-sm mb-1">Category</label>
         <select
           name="category"
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
           className="w-full p-2 rounded bg-bg-secondary border border-border text-text-primary"
         >
           {CATEGORIES.map((c) => (
@@ -100,12 +113,13 @@ export default function NewAchievementForm({
       <div className="flex gap-4">
         <div className="flex-1">
           <label className="block text-text-muted text-sm mb-1">
-            Target Min (Rp)
+            Target Min{unitLabel}
           </label>
           <input
             name="targetMin"
             type="number"
-            placeholder="7000000"
+            step="any"
+            placeholder={isMonetary ? "7000000" : "3.5"}
             className="w-full p-2 rounded bg-bg-secondary border border-border text-text-primary"
           />
           {errors.targetMin && (
@@ -114,12 +128,13 @@ export default function NewAchievementForm({
         </div>
         <div className="flex-1">
           <label className="block text-text-muted text-sm mb-1">
-            Target Ideal (Rp)
+            Target Ideal{unitLabel}
           </label>
           <input
             name="targetIdeal"
             type="number"
-            placeholder="10000000"
+            step="any"
+            placeholder={isMonetary ? "10000000" : "4.0"}
             className="w-full p-2 rounded bg-bg-secondary border border-border text-text-primary"
           />
           {errors.targetIdeal && (
@@ -130,11 +145,12 @@ export default function NewAchievementForm({
 
       <div>
         <label className="block text-text-muted text-sm mb-1">
-          Actual Value (Rp, optional)
+          Actual Value{unitLabel} (optional)
         </label>
         <input
           name="actualValue"
           type="number"
+          step="any"
           className="w-full p-2 rounded bg-bg-secondary border border-border text-text-primary"
         />
       </div>

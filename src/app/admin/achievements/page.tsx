@@ -11,6 +11,15 @@ const STATUS_COLORS: Record<string, string> = {
   OVER_ACHIEVED: "text-galaxy-gold",
 };
 
+const MONETARY_CATEGORIES = ["SALARY", "SAVING", "INVESTMENT"];
+
+function formatValue(value: number, category: string) {
+  if (MONETARY_CATEGORIES.includes(category)) {
+    return `Rp ${value.toLocaleString("id-ID")}`;
+  }
+  return value.toLocaleString("id-ID");
+}
+
 export default async function AchievementsPage() {
   const session = await auth();
   if (!session?.user) redirect("/admin/login");
@@ -52,12 +61,12 @@ export default async function AchievementsPage() {
                 <td className="py-3">{goal.year}</td>
                 <td className="py-3">{goal.category}</td>
                 <td className="py-3 text-text-muted">
-                  Rp {goal.targetMin.toLocaleString("id-ID")} / Rp{" "}
-                  {goal.targetIdeal.toLocaleString("id-ID")}
+                  {formatValue(goal.targetMin, goal.category)} /{" "}
+                  {formatValue(goal.targetIdeal, goal.category)}
                 </td>
                 <td className="py-3">
-                  {goal.actualValue
-                    ? `Rp ${goal.actualValue.toLocaleString("id-ID")}`
+                  {goal.actualValue != null
+                    ? formatValue(goal.actualValue, goal.category)
                     : "-"}
                 </td>
                 <td className="py-3">

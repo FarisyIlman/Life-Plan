@@ -5,13 +5,20 @@ import { useRouter } from "next/navigation";
 import { updateAchievementGoal } from "@/lib/actions/achievement-goal";
 import type { AchievementGoal } from "@prisma/client";
 
-const CATEGORIES = ["SALARY", "SAVING"] as const;
+const CATEGORIES = [
+  "SALARY",
+  "SAVING",
+  "ACADEMIC",
+  "INVESTMENT",
+  "CERTIFICATION",
+] as const;
 const STATUSES = [
   "PENDING",
   "UNDER_ACHIEVED",
   "ACHIEVED",
   "OVER_ACHIEVED",
 ] as const;
+const MONETARY_CATEGORIES = ["SALARY", "SAVING", "INVESTMENT"];
 
 export default function EditAchievementForm({
   goal,
@@ -23,6 +30,12 @@ export default function EditAchievementForm({
   const router = useRouter();
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>(
+    goal.category,
+  );
+
+  const isMonetary = MONETARY_CATEGORIES.includes(selectedCategory);
+  const unitLabel = isMonetary ? " (Rp)" : "";
 
   const handleSubmit = async (formData: FormData) => {
     setLoading(true);
@@ -83,7 +96,8 @@ export default function EditAchievementForm({
         <label className="block text-text-muted text-sm mb-1">Category</label>
         <select
           name="category"
-          defaultValue={goal.category}
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
           className="w-full p-2 rounded bg-bg-secondary border border-border text-text-primary"
         >
           {CATEGORIES.map((c) => (
@@ -100,11 +114,12 @@ export default function EditAchievementForm({
       <div className="flex gap-4">
         <div className="flex-1">
           <label className="block text-text-muted text-sm mb-1">
-            Target Min (Rp)
+            Target Min{unitLabel}
           </label>
           <input
             name="targetMin"
             type="number"
+            step="any"
             defaultValue={goal.targetMin}
             className="w-full p-2 rounded bg-bg-secondary border border-border text-text-primary"
           />
@@ -114,11 +129,12 @@ export default function EditAchievementForm({
         </div>
         <div className="flex-1">
           <label className="block text-text-muted text-sm mb-1">
-            Target Ideal (Rp)
+            Target Ideal{unitLabel}
           </label>
           <input
             name="targetIdeal"
             type="number"
+            step="any"
             defaultValue={goal.targetIdeal}
             className="w-full p-2 rounded bg-bg-secondary border border-border text-text-primary"
           />
@@ -130,11 +146,12 @@ export default function EditAchievementForm({
 
       <div>
         <label className="block text-text-muted text-sm mb-1">
-          Actual Value (Rp, optional)
+          Actual Value{unitLabel} (optional)
         </label>
         <input
           name="actualValue"
           type="number"
+          step="any"
           defaultValue={goal.actualValue ?? ""}
           className="w-full p-2 rounded bg-bg-secondary border border-border text-text-primary"
         />

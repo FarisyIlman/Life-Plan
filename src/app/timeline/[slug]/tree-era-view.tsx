@@ -2,9 +2,13 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import type { Era, ContentBlock } from "@prisma/client";
+import type { Era, ContentBlock, AchievementGoal } from "@prisma/client";
+import AchievementTracker from "@/components/AchievementTracker";
 
-type EraWithData = Era & { contentBlocks: ContentBlock[] };
+type EraWithData = Era & {
+  contentBlocks: ContentBlock[];
+  achievementGoals: AchievementGoal[];
+};
 type EraNav = { slug: string; title: string } | null;
 
 export default function TreeEraView({
@@ -107,6 +111,21 @@ export default function TreeEraView({
           </div>
         )}
       </section>
+
+      {/* Achievement goals, if any */}
+      {era.achievementGoals.length > 0 && (
+        <section className="px-6 pb-12 max-w-4xl mx-auto">
+          {Array.from(new Set(era.achievementGoals.map((g) => g.year)))
+            .sort((a, b) => a - b)
+            .map((year) => (
+              <AchievementTracker
+                key={year}
+                year={year}
+                goals={era.achievementGoals.filter((g) => g.year === year)}
+              />
+            ))}
+        </section>
+      )}
 
       <section className="border-t border-border px-6 py-8 flex justify-between items-center max-w-5xl mx-auto">
         {prevEra ? (

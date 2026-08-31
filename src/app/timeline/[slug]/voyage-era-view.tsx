@@ -2,11 +2,18 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import type { Era, ContentBlock, MasterDegreeNode } from "@prisma/client";
+import type {
+  Era,
+  ContentBlock,
+  MasterDegreeNode,
+  AchievementGoal,
+} from "@prisma/client";
 import MasterFlowchart from "@/components/MasterFlowchart";
+import AchievementTracker from "@/components/AchievementTracker";
 
 type EraWithData = Era & {
   contentBlocks: ContentBlock[];
+  achievementGoals: AchievementGoal[];
 };
 type EraNav = { slug: string; title: string } | null;
 
@@ -119,6 +126,21 @@ export default function VoyageEraView({
               );
             })}
           </div>
+        </section>
+      )}
+
+      {/* Achievement goals, if any */}
+      {era.achievementGoals.length > 0 && (
+        <section className="px-6 pb-12 max-w-4xl mx-auto">
+          {Array.from(new Set(era.achievementGoals.map((g) => g.year)))
+            .sort((a, b) => a - b)
+            .map((year) => (
+              <AchievementTracker
+                key={year}
+                year={year}
+                goals={era.achievementGoals.filter((g) => g.year === year)}
+              />
+            ))}
         </section>
       )}
 

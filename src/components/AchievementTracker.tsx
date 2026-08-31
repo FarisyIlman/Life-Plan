@@ -21,8 +21,21 @@ const STATUS_STYLES: Record<
   },
 };
 
-function formatRupiah(value: number) {
-  return `Rp ${value.toLocaleString("id-ID")}`;
+const CATEGORY_LABELS: Record<string, string> = {
+  SALARY: "Salary Target",
+  SAVING: "Saving Target",
+  ACADEMIC: "Academic Goal",
+  INVESTMENT: "Investment Target",
+  CERTIFICATION: "Certification Goal",
+};
+
+const MONETARY_CATEGORIES = ["SALARY", "SAVING", "INVESTMENT"];
+
+function formatValue(value: number, category: string) {
+  if (MONETARY_CATEGORIES.includes(category)) {
+    return `Rp ${value.toLocaleString("id-ID")}`;
+  }
+  return value.toLocaleString("id-ID");
 }
 
 export default function AchievementTracker({
@@ -32,18 +45,18 @@ export default function AchievementTracker({
   year: number;
   goals: AchievementGoal[];
 }) {
-  const salary = goals.find((g) => g.category === "SALARY");
-  const saving = goals.find((g) => g.category === "SAVING");
+  if (goals.length === 0) return null;
 
-  const renderGoalCard = (goal: AchievementGoal | undefined, label: string) => {
-    if (!goal) return null;
+  const renderGoalCard = (goal: AchievementGoal) => {
     const style = STATUS_STYLES[goal.status];
+    const label = CATEGORY_LABELS[goal.category] || goal.category;
     const progress = goal.actualValue
       ? Math.min(100, Math.round((goal.actualValue / goal.targetIdeal) * 100))
       : 0;
 
     return (
       <motion.div
+        key={goal.id}
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
@@ -62,11 +75,11 @@ export default function AchievementTracker({
         </div>
 
         <div className="text-sm text-text-muted mb-3">
-          <p>Min: {formatRupiah(goal.targetMin)}</p>
-          <p>Ideal: {formatRupiah(goal.targetIdeal)}</p>
+          <p>Min: {formatValue(goal.targetMin, goal.category)}</p>
+          <p>Ideal: {formatValue(goal.targetIdeal, goal.category)}</p>
           {goal.actualValue != null && (
             <p className="text-text-primary mt-1">
-              Actual: {formatRupiah(goal.actualValue)}
+              Actual: {formatValue(goal.actualValue, goal.category)}
             </p>
           )}
         </div>
@@ -90,14 +103,11 @@ export default function AchievementTracker({
     );
   };
 
-  if (!salary && !saving) return null;
-
   return (
     <div className="mb-8">
       <h3 className="font-racing text-2xl text-text-primary mb-4">{year}</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {renderGoalCard(salary, "Salary Target")}
-        {renderGoalCard(saving, "Saving Target")}
+        {goals.map((goal) => renderGoalCard(goal))}
       </div>
     </div>
   );
