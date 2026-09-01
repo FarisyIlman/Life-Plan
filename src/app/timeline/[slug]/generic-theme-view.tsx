@@ -50,7 +50,7 @@ export default function GenericThemeView({
   return (
     <div className="min-h-screen bg-bg-primary">
       {/* Breadcrumb */}
-      <div className="px-6 pt-6">
+      <div className="px-6 pt-20">
         <Link
           href="/timeline"
           className="text-text-muted text-sm hover:text-accent"

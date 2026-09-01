@@ -40,7 +40,7 @@ export default function RacingEraView({
       {/* Racing background accent */}
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-red-600/10 via-transparent to-transparent" />
 
-      <div className="px-6 pt-6">
+      <div className="px-6 pt-20">
         <Link
           href="/timeline"
           className="text-text-muted text-sm hover:text-accent"

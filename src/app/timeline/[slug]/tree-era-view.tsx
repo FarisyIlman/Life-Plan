@@ -32,7 +32,7 @@ export default function TreeEraView({
     <div className="min-h-screen bg-bg-primary relative overflow-hidden">
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-green-800/10 via-transparent to-transparent" />
 
-      <div className="px-6 pt-6">
+      <div className="px-6 pt-20">
         <Link
           href="/timeline"
           className="text-text-muted text-sm hover:text-accent"
