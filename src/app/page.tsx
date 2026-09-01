@@ -1,5 +1,6 @@
 import HomeClient from "./home-client";
 import HeroSection from "@/components/HeroSection";
+import IntroSection from "@/components/IntroSection";
 import TimelinePreview from "@/components/TimelinePreview";
 import Footer from "@/components/Footer";
 
@@ -22,6 +23,7 @@ export default function Home() {
       />
       <HomeClient>
         <HeroSection />
+        <IntroSection />
         <TimelinePreview />
         <Footer />
       </HomeClient>
