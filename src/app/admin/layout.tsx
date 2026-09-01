@@ -67,6 +67,12 @@ export default async function AdminLayout({
               )}
             </Link>
             <Link
+              href="/admin/users"
+              className="text-sm text-text-muted hover:text-accent whitespace-nowrap"
+            >
+              Admins
+            </Link>
+            <Link
               href="/admin/logs"
               className="text-sm text-text-muted hover:text-accent whitespace-nowrap"
             >
