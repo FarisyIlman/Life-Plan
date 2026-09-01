@@ -64,14 +64,24 @@ export default function TimelineClient({ eras }: { eras: Era[] }) {
 
         {/* Dot navigation */}
         <div className="fixed right-6 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-3">
-          {eras.map((era, i) => (
-            <button
-              key={era.id}
-              onClick={() => scrollToSection(i)}
-              className="w-3 h-3 rounded-full border border-accent hover:bg-accent transition"
-              aria-label={`Jump to ${era.title}`}
-            />
-          ))}
+          {eras.map((era, i) => {
+            const color = THEME_COLORS[era.theme] || "#7C6FEF";
+            return (
+              <button
+                key={era.id}
+                onClick={() => scrollToSection(i)}
+                className="w-3 h-3 rounded-full border transition hover:scale-125"
+                style={{ borderColor: color }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.backgroundColor = color)
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.backgroundColor = "transparent")
+                }
+                aria-label={`Jump to ${era.title}`}
+              />
+            );
+          })}
         </div>
 
         {eras.map((era, i) => (
