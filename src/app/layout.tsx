@@ -1,4 +1,5 @@
 import { Providers } from "./providers";
+import ConditionalNavbar from "@/components/ConditionalNavbar";
 import {
   Space_Grotesk,
   Inter,
@@ -46,7 +47,10 @@ export default function RootLayout({
       <body
         className={`${spaceGrotesk.variable} ${inter.variable} ${orbitron.variable} ${rajdhani.variable} ${cinzel.variable} font-body bg-bg-primary text-text-primary`}
       >
-        <Providers>{children}</Providers>
+        <Providers>
+          <ConditionalNavbar />
+          {children}
+        </Providers>
       </body>
     </html>
   );

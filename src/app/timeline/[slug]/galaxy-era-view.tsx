@@ -32,7 +32,7 @@ export default function GalaxyEraView({
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-galaxy-purple/10 via-transparent to-transparent" />
 
       {/* Breadcrumb */}
-      <div className="px-6 pt-6">
+      <div className="px-6 pt-20">
         <Link
           href="/timeline"
           className="text-text-muted text-sm hover:text-accent"
