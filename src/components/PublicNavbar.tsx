@@ -70,6 +70,14 @@ export default function PublicNavbar() {
             Timeline
           </Link>
           <Link
+            href="/calendar"
+            className={`text-sm hover:text-accent transition ${
+              pathname === "/calendar" ? "text-accent" : "text-text-muted"
+            }`}
+          >
+            Calendar
+          </Link>
+          <Link
             href="/about"
             className={`text-sm hover:text-accent transition ${
               pathname === "/about" ? "text-accent" : "text-text-muted"
@@ -106,6 +114,14 @@ export default function PublicNavbar() {
             }`}
           >
             Timeline
+          </Link>
+          <Link
+            href="/calendar"
+            className={`text-sm ${
+              pathname === "/calendar" ? "text-accent" : "text-text-muted"
+            }`}
+          >
+            Calendar
           </Link>
           <Link
             href="/about"
