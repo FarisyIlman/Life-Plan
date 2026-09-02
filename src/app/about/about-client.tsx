@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { Bold } from "lucide-react";
 import Link from "next/link";
 
 const FUN_FACTS = [
@@ -11,7 +12,8 @@ const FUN_FACTS = [
   { label: "Favorite Movie", value: "Interstellar" },
   {
     label: "Favorite Anime",
-    value: "Naruto (for the normies) & Fullmetal Alchemist: Brotherhood",
+    value:
+      "Naruto (for the normies) & Fullmetal Alchemist: Brotherhood (for the real ones)",
   },
   { label: "Favorite Animation", value: "Gravity Falls" },
   { label: "Favorite Food", value: "Indomie / Instant Noodle" },
@@ -49,9 +51,9 @@ export default function AboutClient() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="text-text-muted max-w-lg"
         >
-          The Logician behind the code — an INTP who&apos;d rather build
-          something than talk about building it. Welcome to the part of the site
-          that isn&apos;t a CV.
+          The Logician behind the code, an INTP whod rather build something than
+          talk about building it. Welcome to the part of the site that isnt a
+          CV.
         </motion.p>
       </section>
 

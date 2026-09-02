@@ -15,7 +15,7 @@ export default function HeroSection() {
           height: ((seed % 5) + 1) * 0.8,
           top: `${(seed * 7.3) % 100}%`,
           left: `${(seed * 11.7) % 100}%`,
-          opacity: 0.2 + ((index % 7) / 10),
+          opacity: 0.2 + (index % 7) / 10,
         };
       }),
     [],
@@ -55,7 +55,7 @@ export default function HeroSection() {
         transition={{ duration: 0.8, delay: 0.2 }}
         className="font-body text-text-muted text-lg max-w-xl mb-10"
       >
-        An immersive, story-driven journey through my life — from 2026 into the
+        An immersive, story-driven journey through my life from 2026 into the
         future.
       </motion.p>
 

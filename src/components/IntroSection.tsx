@@ -32,7 +32,7 @@ export default function IntroSection() {
         transition={{ duration: 0.7, delay: 0.2 }}
         className="text-text-muted leading-relaxed"
       >
-        I am Farisy — a student, developer, and someone who likes turning vague
+        I am Frsy, a student, developer, and someone who likes turning vague
         life goals into something you can actually track. This site is both a
         personal roadmap and a technical playground: every year from 2026 onward
         gets its own visual identity, its own theme, its own way of telling the
