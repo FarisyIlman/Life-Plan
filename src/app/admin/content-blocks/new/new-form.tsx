@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createContentBlock } from "@/lib/actions/content-block";
 import CardGalaxyTheme from "@/components/CardGalaxyTheme";
+import CardMonthlyTheme from "@/components/CardMonthlyTheme";
 import type { ContentBlockPreview } from "@/lib/types";
 
 const TYPES = ["card", "monthly-card"] as const;
@@ -11,13 +12,14 @@ const TYPES = ["card", "monthly-card"] as const;
 export default function NewContentBlockForm({
   eras,
 }: {
-  eras: { id: string; title: string }[];
+  eras: { id: string; title: string; theme: string }[];
 }) {
   const router = useRouter();
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(false);
 
-  // Preview state — mirrors form fields
+  const [selectedEraId, setSelectedEraId] = useState(eras[0]?.id || "");
+
   const [preview, setPreview] = useState({
     title: "",
     subtitle: "",
@@ -44,7 +46,9 @@ export default function NewContentBlockForm({
     router.push("/admin/content-blocks");
   };
 
-  // Fake block object shaped like Prisma's ContentBlock, for the preview card
+  const selectedEra = eras.find((e) => e.id === selectedEraId);
+  const theme = selectedEra?.theme || "GALAXY";
+
   const previewBlock: ContentBlockPreview = {
     id: "preview",
     title: preview.title || "Untitled",
@@ -56,6 +60,32 @@ export default function NewContentBlockForm({
       techStack: preview.techStack,
       responsibilities: preview.responsibilities,
     },
+  };
+
+  const renderPreview = () => {
+    switch (theme) {
+      case "GALAXY":
+        return <CardGalaxyTheme block={previewBlock} />;
+      case "MONTHLY":
+        return <CardMonthlyTheme block={previewBlock} />;
+      default:
+        // Racing, Voyage, Tree — fallback to a simple generic card
+        return (
+          <div className="bg-bg-secondary border border-border rounded-xl p-6">
+            <h3 className="font-heading text-xl text-text-primary mb-1">
+              {previewBlock.title}
+            </h3>
+            {previewBlock.subtitle && (
+              <p className="text-text-muted text-sm mb-4">
+                {previewBlock.subtitle}
+              </p>
+            )}
+            {preview.description && (
+              <p className="text-text-primary text-sm">{preview.description}</p>
+            )}
+          </div>
+        );
+    }
   };
 
   return (
@@ -71,6 +101,8 @@ export default function NewContentBlockForm({
           <label className="block text-text-muted text-sm mb-1">Era</label>
           <select
             name="eraId"
+            value={selectedEraId}
+            onChange={(e) => setSelectedEraId(e.target.value)}
             className="w-full p-2 rounded bg-bg-secondary border border-border text-text-primary"
           >
             {eras.map((era) => (
@@ -252,9 +284,9 @@ export default function NewContentBlockForm({
       {/* Live preview panel */}
       <div>
         <p className="text-text-muted text-xs font-heading tracking-wide mb-3">
-          LIVE PREVIEW (Galaxy style)
+          LIVE PREVIEW ({theme} style)
         </p>
-        <CardGalaxyTheme block={previewBlock} />
+        {renderPreview()}
       </div>
     </div>
   );

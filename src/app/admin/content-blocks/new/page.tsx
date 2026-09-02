@@ -10,7 +10,7 @@ export default async function NewContentBlockPage() {
   const eras = await prisma.era.findMany({
     where: { deletedAt: null },
     orderBy: { order: "asc" },
-    select: { id: true, title: true },
+    select: { id: true, title: true, theme: true },
   });
 
   return (

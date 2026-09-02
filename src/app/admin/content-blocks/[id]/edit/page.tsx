@@ -19,7 +19,7 @@ export default async function EditContentBlockPage({
     prisma.era.findMany({
       where: { deletedAt: null },
       orderBy: { order: "asc" },
-      select: { id: true, title: true },
+      select: { id: true, title: true, theme: true },
     }),
   ]);
 
