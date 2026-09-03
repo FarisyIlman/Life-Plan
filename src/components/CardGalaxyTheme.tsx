@@ -13,6 +13,7 @@ export default function CardGalaxyTheme({
     description?: string;
     techStack?: string;
     responsibilities?: string;
+    textColor?: string;
   };
 
   return (
@@ -32,7 +33,10 @@ export default function CardGalaxyTheme({
         </p>
       )}
 
-      <h3 className="font-galaxy text-xl text-text-primary mb-1">
+      <h3
+        className="font-galaxy text-xl mb-1"
+        style={{ color: data.textColor || undefined }}
+      >
         {block.title}
       </h3>
       {block.subtitle && (
@@ -40,7 +44,12 @@ export default function CardGalaxyTheme({
       )}
 
       {data.description && (
-        <p className="text-text-primary text-sm mb-4">{data.description}</p>
+        <p
+          className="text-text-primary text-sm mb-4"
+          style={{ color: data.textColor || undefined }}
+        >
+          {data.description}
+        </p>
       )}
 
       {data.techStack && (

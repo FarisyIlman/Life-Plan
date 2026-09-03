@@ -11,12 +11,14 @@ function buildData(parsed: {
   techStack?: string;
   responsibilities?: string;
   month?: number;
+  textColor?: string;
 }) {
   return {
     description: parsed.description || "",
     techStack: parsed.techStack || "",
     responsibilities: parsed.responsibilities || "",
     month: parsed.month || null,
+    textColor: parsed.textColor || null,
   };
 }
 
@@ -44,6 +46,7 @@ export async function createContentBlock(formData: FormData) {
     techStack,
     responsibilities,
     month,
+    textColor,
   } = parsed.data;
 
   try {
@@ -53,7 +56,13 @@ export async function createContentBlock(formData: FormData) {
         type,
         title,
         subtitle: subtitle || null,
-        data: buildData({ description, techStack, responsibilities, month }),
+        data: buildData({
+          description,
+          techStack,
+          responsibilities,
+          month,
+          textColor,
+        }),
         deadline: deadline ? new Date(deadline) : null,
         order,
         isPublished,
@@ -92,6 +101,7 @@ export async function updateContentBlock(id: string, formData: FormData) {
     techStack,
     responsibilities,
     month,
+    textColor,
   } = parsed.data;
 
   try {
@@ -102,7 +112,13 @@ export async function updateContentBlock(id: string, formData: FormData) {
         type,
         title,
         subtitle: subtitle || null,
-        data: buildData({ description, techStack, responsibilities, month }),
+        data: buildData({
+          description,
+          techStack,
+          responsibilities,
+          month,
+          textColor,
+        }),
         deadline: deadline ? new Date(deadline) : null,
         order,
         isPublished,

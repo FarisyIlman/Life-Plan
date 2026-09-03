@@ -13,6 +13,7 @@ export default function CardMonthlyTheme({
     description?: string;
     techStack?: string;
     responsibilities?: string;
+    textColor?: string;
   };
 
   return (
@@ -30,7 +31,10 @@ export default function CardMonthlyTheme({
         </p>
       )}
 
-      <h3 className="font-heading text-lg text-text-primary mb-1">
+      <h3
+        className="font-heading text-lg mb-1"
+        style={{ color: data.textColor || undefined }}
+      >
         {block.title}
       </h3>
       {block.subtitle && (
@@ -38,7 +42,12 @@ export default function CardMonthlyTheme({
       )}
 
       {data.description && (
-        <p className="text-text-primary text-sm mb-3">{data.description}</p>
+        <p
+          className="text-text-primary text-sm mb-3"
+          style={{ color: data.textColor || undefined }}
+        >
+          {data.description}
+        </p>
       )}
 
       {data.techStack && (

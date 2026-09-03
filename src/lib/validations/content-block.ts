@@ -9,6 +9,7 @@ export const contentBlockSchema = z.object({
   description: z.string().optional(),
   techStack: z.string().optional(),
   responsibilities: z.string().optional(),
+  textColor: z.string().optional(),
   month: z
     .string()
     .optional()

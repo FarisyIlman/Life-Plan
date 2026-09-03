@@ -8,5 +8,6 @@ export interface ContentBlockPreview {
     description?: string;
     techStack?: string;
     responsibilities?: string;
+    textColor?: string;
   };
 }

@@ -26,11 +26,11 @@ export default function EditContentBlockForm({
     techStack?: string;
     responsibilities?: string;
     month?: number;
+    textColor?: string;
   };
 
   const [selectedEraId, setSelectedEraId] = useState(block.eraId);
 
-  // Preview state — initialized from existing block data
   const [preview, setPreview] = useState({
     title: block.title || "",
     subtitle: block.subtitle || "",
@@ -41,6 +41,7 @@ export default function EditContentBlockForm({
       ? new Date(block.deadline).toISOString().split("T")[0]
       : "",
     isCompleted: block.isCompleted,
+    textColor: data.textColor || "",
   });
 
   const handleSubmit = async (formData: FormData) => {
@@ -72,6 +73,7 @@ export default function EditContentBlockForm({
       description: preview.description,
       techStack: preview.techStack,
       responsibilities: preview.responsibilities,
+      textColor: preview.textColor,
     },
   };
 
@@ -84,7 +86,10 @@ export default function EditContentBlockForm({
       default:
         return (
           <div className="bg-bg-secondary border border-border rounded-xl p-6">
-            <h3 className="font-heading text-xl text-text-primary mb-1">
+            <h3
+              className="font-heading text-xl mb-1"
+              style={{ color: preview.textColor || undefined }}
+            >
               {previewBlock.title}
             </h3>
             {previewBlock.subtitle && (
@@ -93,7 +98,12 @@ export default function EditContentBlockForm({
               </p>
             )}
             {preview.description && (
-              <p className="text-text-primary text-sm">{preview.description}</p>
+              <p
+                className="text-text-primary text-sm"
+                style={{ color: preview.textColor || undefined }}
+              >
+                {preview.description}
+              </p>
             )}
           </div>
         );
@@ -199,6 +209,32 @@ export default function EditContentBlockForm({
             }
             className="w-full p-2 rounded bg-bg-secondary border border-border text-text-primary"
           />
+        </div>
+
+        <div>
+          <label className="block text-text-muted text-sm mb-1">
+            Text Color (optional)
+          </label>
+          <div className="flex items-center gap-3">
+            <input
+              name="textColor"
+              type="color"
+              value={preview.textColor || "#E8E9ED"}
+              onChange={(e) =>
+                setPreview((p) => ({ ...p, textColor: e.target.value }))
+              }
+              className="w-12 h-10 rounded bg-bg-secondary border border-border cursor-pointer"
+            />
+            <input
+              type="text"
+              value={preview.textColor}
+              onChange={(e) =>
+                setPreview((p) => ({ ...p, textColor: e.target.value }))
+              }
+              placeholder="#E8E9ED (default)"
+              className="flex-1 p-2 rounded bg-bg-secondary border border-border text-text-primary text-sm"
+            />
+          </div>
         </div>
 
         <div>
