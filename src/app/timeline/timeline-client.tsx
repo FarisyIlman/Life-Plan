@@ -105,7 +105,8 @@ export default function TimelineClient({ eras }: { eras: Era[] }) {
             )}
             <Link
               href={`/timeline/${era.slug}`}
-              className="bg-accent text-white px-6 py-3 rounded font-heading hover:opacity-90 transition"
+              className="text-white px-6 py-3 rounded font-heading hover:opacity-90 transition"
+              style={{ backgroundColor: THEME_COLORS[era.theme] || "#7C6FEF" }}
             >
               View Details →
             </Link>
