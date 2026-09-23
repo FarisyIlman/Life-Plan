@@ -6,6 +6,7 @@ import { updateContentBlock } from "@/lib/actions/content-block";
 import type { ContentBlock } from "@prisma/client";
 import CardGalaxyTheme from "@/components/CardGalaxyTheme";
 import CardMonthlyTheme from "@/components/CardMonthlyTheme";
+import CardThemeContent from "@/components/CardThemeContent";
 import type { ContentBlockPreview } from "@/lib/types";
 
 const TYPES = ["card", "monthly-card"] as const;
@@ -83,30 +84,14 @@ export default function EditContentBlockForm({
         return <CardGalaxyTheme block={previewBlock} />;
       case "MONTHLY":
         return <CardMonthlyTheme block={previewBlock} />;
+      case "RACING":
+        return <CardThemeContent block={previewBlock} theme="GENERIC" />;
+      case "VOYAGE":
+        return <CardThemeContent block={previewBlock} theme="VOYAGE" />;
+      case "TREE":
+        return <CardThemeContent block={previewBlock} theme="TREE" />;
       default:
-        return (
-          <div className="bg-bg-secondary border border-border rounded-xl p-6">
-            <h3
-              className="font-heading text-xl mb-1"
-              style={{ color: preview.textColor || undefined }}
-            >
-              {previewBlock.title}
-            </h3>
-            {previewBlock.subtitle && (
-              <p className="text-text-muted text-sm mb-4">
-                {previewBlock.subtitle}
-              </p>
-            )}
-            {preview.description && (
-              <p
-                className="text-text-primary text-sm"
-                style={{ color: preview.textColor || undefined }}
-              >
-                {preview.description}
-              </p>
-            )}
-          </div>
-        );
+        return <CardThemeContent block={previewBlock} theme="GENERIC" />;
     }
   };
 

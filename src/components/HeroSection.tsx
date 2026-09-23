@@ -67,7 +67,7 @@ export default function HeroSection() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.1 }}
-        className="font-heading text-5xl md:text-7xl lg:text-8xl text-text-primary mb-6 leading-[1.05] max-w-4xl"
+        className="font-heading text-4xl sm:text-5xl md:text-7xl lg:text-8xl text-text-primary mb-6 leading-[1.05] max-w-4xl"
       >
         Imagine a life <span className="text-accent">planned out loud</span>
       </motion.h1>
@@ -87,17 +87,17 @@ export default function HeroSection() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.3 }}
-        className="flex gap-4"
+        className="flex w-full max-w-md flex-col gap-3 sm:flex-row sm:justify-center sm:gap-4"
       >
         <Link
           href="/timeline"
-          className="bg-accent text-white px-6 py-3 rounded font-heading hover:opacity-90 transition"
+          className="min-h-11 flex items-center justify-center bg-accent text-white px-6 py-3 rounded font-heading hover:opacity-90 transition"
         >
           Start the Journey
         </Link>
         <Link
           href="/about"
-          className="border border-border text-text-primary px-6 py-3 rounded font-heading hover:bg-bg-secondary transition"
+          className="min-h-11 flex items-center justify-center border border-border text-text-primary px-6 py-3 rounded font-heading hover:bg-bg-secondary transition"
         >
           About Me
         </Link>

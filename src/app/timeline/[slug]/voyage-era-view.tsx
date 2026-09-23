@@ -10,6 +10,7 @@ import type {
 } from "@prisma/client";
 import MasterFlowchart from "@/components/MasterFlowchart";
 import AchievementTracker from "@/components/AchievementTracker";
+import CardThemeContent from "@/components/CardThemeContent";
 
 type EraWithData = Era & {
   contentBlocks: ContentBlock[];
@@ -33,8 +34,8 @@ export default function VoyageEraView({
   const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-bg-primary relative overflow-hidden">
-      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-teal-600/10 via-transparent to-transparent" />
+    <div className="min-h-screen bg-bg-primary relative">
+      <div className="absolute inset-0 -z-10 bg-linear-to-b from-teal-600/10 via-transparent to-transparent" />
 
       <div className="px-6 pt-20">
         <Link
@@ -56,7 +57,7 @@ export default function VoyageEraView({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="font-voyage text-5xl md:text-6xl text-text-primary mb-4"
+          className="font-voyage text-4xl sm:text-5xl md:text-6xl text-text-primary mb-4 break-words"
         >
           {era.title}
         </motion.h1>
@@ -92,39 +93,9 @@ export default function VoyageEraView({
       {total > 0 && (
         <section className="px-6 pb-20 max-w-3xl mx-auto">
           <div className="space-y-4">
-            {era.contentBlocks.map((block) => {
-              const data = block.data as { description?: string };
-              return (
-                <div
-                  key={block.id}
-                  className="bg-bg-secondary border border-border rounded-lg p-5 border-l-4 border-l-teal-500"
-                >
-                  {block.deadline && (
-                    <p className="text-voyage-teal text-xs mb-1 font-voyage">
-                      {new Date(block.deadline).toLocaleDateString("en-GB")}
-                    </p>
-                  )}
-                  <h4 className="font-voyage text-lg text-text-primary mb-1">
-                    {block.title}
-                  </h4>
-                  {block.subtitle && (
-                    <p className="text-text-muted text-sm mb-2">
-                      {block.subtitle}
-                    </p>
-                  )}
-                  {data.description && (
-                    <p className="text-text-primary text-sm">
-                      {data.description}
-                    </p>
-                  )}
-                  {block.isCompleted && (
-                    <span className="inline-block mt-3 text-green-400 text-xs font-heading">
-                      ✓ Completed
-                    </span>
-                  )}
-                </div>
-              );
-            })}
+            {era.contentBlocks.map((block) => (
+              <CardThemeContent key={block.id} block={block} theme="VOYAGE" />
+            ))}
           </div>
         </section>
       )}
@@ -144,11 +115,11 @@ export default function VoyageEraView({
         </section>
       )}
 
-      <section className="border-t border-border px-6 py-8 flex justify-between items-center max-w-5xl mx-auto">
+      <section className="border-t border-border px-6 py-8 flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center max-w-5xl mx-auto">
         {prevEra ? (
           <Link
             href={`/timeline/${prevEra.slug}`}
-            className="text-text-muted hover:text-accent transition"
+            className="min-h-11 flex items-center text-text-muted hover:text-accent transition break-words"
           >
             ← {prevEra.title}
           </Link>
@@ -158,7 +129,7 @@ export default function VoyageEraView({
         {nextEra ? (
           <Link
             href={`/timeline/${nextEra.slug}`}
-            className="text-text-muted hover:text-accent transition"
+            className="min-h-11 flex items-center justify-end text-text-muted hover:text-accent transition break-words sm:text-right"
           >
             {nextEra.title} →
           </Link>

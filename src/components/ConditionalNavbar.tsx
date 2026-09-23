@@ -9,5 +9,5 @@ export default function ConditionalNavbar() {
 
   if (isAdmin) return null;
 
-  return <PublicNavbar />;
+  return <PublicNavbar key={pathname} />;
 }

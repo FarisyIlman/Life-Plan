@@ -82,15 +82,26 @@ This is **not a conventional portfolio site** — it's designed to feel like an 
 - Calendar & deadline view with 1/3/7-day filters and overdue markers
 - Search and combined filtering (title, era, theme, publish status, completion)
 - Live, theme-aware preview of content blocks before publishing
+- Per-content-block text color with theme-default fallback
+- GFM Markdown rendering, including tables, in every public theme card
 - Drag-and-drop reordering for eras and content blocks
 - Bulk actions (publish/unpublish, mark complete/pending, delete) for content blocks
 - Soft delete with a dedicated Trash page (restore or permanently delete)
 - Notification system with unread badge and deadline-based auto-generation via cron
 - Full activity log auditing every admin action
+- Delete actions show loading/error feedback and refresh only after success
+
+### Resilience and fallbacks
+
+- Invalid timeline slugs show the standard not-found page.
+- Missing content or achievement data renders an empty state instead of failing.
+- Invalid calendar month/year query values fall back to the current month.
+- Calendar database failures show a retryable unavailable state.
+- Unsupported themes use a neutral generic content renderer.
 
 ## Architecture Highlights
 
-- **Flexible content model** — a single `ContentBlock` model with a `type` + JSON `data` field renders completely different UI per era theme, keeping the backend schema stable while the frontend stays fully custom per year.
+- **Flexible content model** — a single `ContentBlock` model with a `type` + JSON `data` field renders theme-specific UI per era while keeping the backend schema stable. Achievement goals remain era-scoped and use one reusable tracker component.
 - **Edge-safe auth split** — `auth.config.ts` (no Node dependencies) powers route-protection via Next.js 16's `proxy.ts` convention on the Edge runtime, while `auth.ts` (with Prisma) handles full authentication logic on the Node runtime. Every admin server component also re-checks the session directly as defense-in-depth.
 - **Activity logging** — every meaningful admin action (CRUD, completion toggles, bulk operations) is recorded with actor, action, entity, and a JSON detail snapshot.
 - **Deadline notifications** — a cron-triggered, secret-protected endpoint scans `ContentBlock.deadline` and generates `DEADLINE_7D/3D/1D` notifications atomically, using a database-level unique constraint to guarantee no duplicates even under concurrent triggers.

@@ -61,10 +61,10 @@ export default async function PublicCalendarPage({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Calendar grid */}
           <div className="lg:col-span-2">
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center mb-4 gap-3">
               <Link
                 href={`/calendar?month=${prevMonth}&year=${prevYear}`}
-                className="text-text-muted hover:text-accent text-sm"
+                className="min-h-11 min-w-11 flex items-center justify-center text-text-muted hover:text-accent text-sm"
               >
                 ← Prev
               </Link>
@@ -76,7 +76,7 @@ export default async function PublicCalendarPage({
               </h2>
               <Link
                 href={`/calendar?month=${nextMonth}&year=${nextYear}`}
-                className="text-text-muted hover:text-accent text-sm"
+                className="min-h-11 min-w-11 flex items-center justify-center text-text-muted hover:text-accent text-sm"
               >
                 Next →
               </Link>
@@ -93,7 +93,7 @@ export default async function PublicCalendarPage({
           {/* Upcoming list */}
           <div>
             <h2 className="font-heading text-xl mb-4">Upcoming</h2>
-            <div className="space-y-3 max-h-[600px] overflow-y-auto">
+            <div className="space-y-3 sm:max-h-[600px] sm:overflow-y-auto">
               {upcoming.length === 0 ? (
                 <p className="text-text-muted text-sm">
                   No upcoming milestones right now.

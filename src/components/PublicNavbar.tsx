@@ -31,10 +31,16 @@ export default function PublicNavbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu on route change
   useEffect(() => {
-    setMenuOpen(false);
-  }, [pathname]);
+    if (!menuOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [menuOpen]);
 
   const eraSlugMatch = pathname.match(/^\/timeline\/([^/]+)/);
   const currentEraSlug = eraSlugMatch ? eraSlugMatch[1] : null;
@@ -42,7 +48,7 @@ export default function PublicNavbar() {
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        visible ? "translate-y-0" : "-translate-y-full"
+        visible || menuOpen ? "translate-y-0" : "-translate-y-full"
       } ${
         solid || menuOpen
           ? "bg-bg-primary/95 backdrop-blur-sm border-b border-border"
@@ -60,7 +66,17 @@ export default function PublicNavbar() {
         {/* Desktop links */}
         <div className="hidden md:flex items-center gap-6">
           <Link
+            href="/"
+            aria-current={pathname === "/" ? "page" : undefined}
+            className={`text-sm hover:text-accent transition ${
+              pathname === "/" ? "text-accent" : "text-text-muted"
+            }`}
+          >
+            Home
+          </Link>
+          <Link
             href="/timeline"
+            aria-current={pathname.startsWith("/timeline") ? "page" : undefined}
             className={`text-sm hover:text-accent transition ${
               pathname.startsWith("/timeline")
                 ? "text-accent"
@@ -71,6 +87,7 @@ export default function PublicNavbar() {
           </Link>
           <Link
             href="/calendar"
+            aria-current={pathname === "/calendar" ? "page" : undefined}
             className={`text-sm hover:text-accent transition ${
               pathname === "/calendar" ? "text-accent" : "text-text-muted"
             }`}
@@ -79,6 +96,7 @@ export default function PublicNavbar() {
           </Link>
           <Link
             href="/about"
+            aria-current={pathname === "/about" ? "page" : undefined}
             className={`text-sm hover:text-accent transition ${
               pathname === "/about" ? "text-accent" : "text-text-muted"
             }`}
@@ -95,8 +113,10 @@ export default function PublicNavbar() {
         {/* Mobile hamburger button */}
         <button
           onClick={() => setMenuOpen((v) => !v)}
-          className="md:hidden text-text-primary"
-          aria-label="Toggle menu"
+          className="md:hidden min-h-11 min-w-11 flex items-center justify-center text-text-primary"
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={menuOpen}
+          aria-controls="public-mobile-menu"
         >
           {menuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
@@ -104,10 +124,25 @@ export default function PublicNavbar() {
 
       {/* Mobile dropdown menu */}
       {menuOpen && (
-        <div className="md:hidden px-6 pb-4 flex flex-col gap-4 border-t border-border">
+        <div
+          id="public-mobile-menu"
+          className="md:hidden px-6 pb-4 flex flex-col gap-4 border-t border-border"
+        >
+          <Link
+            href="/"
+            onClick={() => setMenuOpen(false)}
+            aria-current={pathname === "/" ? "page" : undefined}
+            className={`text-sm pt-4 ${
+              pathname === "/" ? "text-accent" : "text-text-muted"
+            }`}
+          >
+            Home
+          </Link>
           <Link
             href="/timeline"
-            className={`text-sm pt-4 ${
+            onClick={() => setMenuOpen(false)}
+            aria-current={pathname.startsWith("/timeline") ? "page" : undefined}
+            className={`text-sm ${
               pathname.startsWith("/timeline")
                 ? "text-accent"
                 : "text-text-muted"
@@ -117,6 +152,8 @@ export default function PublicNavbar() {
           </Link>
           <Link
             href="/calendar"
+            onClick={() => setMenuOpen(false)}
+            aria-current={pathname === "/calendar" ? "page" : undefined}
             className={`text-sm ${
               pathname === "/calendar" ? "text-accent" : "text-text-muted"
             }`}
@@ -125,6 +162,8 @@ export default function PublicNavbar() {
           </Link>
           <Link
             href="/about"
+            onClick={() => setMenuOpen(false)}
+            aria-current={pathname === "/about" ? "page" : undefined}
             className={`text-sm ${
               pathname === "/about" ? "text-accent" : "text-text-muted"
             }`}

@@ -17,8 +17,8 @@ export default async function AdminLayout({
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary">
       {session?.user && (
-        <nav className="border-b border-border px-6 py-3 flex items-center justify-between sticky top-0 bg-bg-primary z-40">
-          <div className="flex items-center gap-5 overflow-x-auto">
+        <nav className="border-b border-border px-4 sm:px-6 py-2 flex items-center justify-between sticky top-0 bg-bg-primary z-40">
+          <div className="flex items-center gap-2 sm:gap-5 overflow-x-auto [&_a]:min-h-11 [&_a]:flex [&_a]:items-center">
             <Link
               href="/admin/dashboard"
               className="font-heading text-sm hover:text-accent whitespace-nowrap"

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import type { Era, ContentBlock, AchievementGoal } from "@prisma/client";
 import AchievementTracker from "@/components/AchievementTracker";
+import CardThemeContent from "@/components/CardThemeContent";
 
 type EraWithData = Era & {
   contentBlocks: ContentBlock[];
@@ -29,8 +30,8 @@ export default function TreeEraView({
   const isBeyond = era.slug.toLowerCase().includes("beyond");
 
   return (
-    <div className="min-h-screen bg-bg-primary relative overflow-hidden">
-      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-green-800/10 via-transparent to-transparent" />
+    <div className="min-h-screen bg-bg-primary relative">
+      <div className="absolute inset-0 -z-10 bg-linear-to-b from-green-800/10 via-transparent to-transparent" />
 
       <div className="px-6 pt-20">
         <Link
@@ -49,7 +50,7 @@ export default function TreeEraView({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="font-heading font-light text-5xl md:text-6xl text-text-primary mb-4"
+          className="font-heading font-light text-4xl sm:text-5xl md:text-6xl text-text-primary mb-4 break-words"
         >
           {era.title}
         </motion.h1>
@@ -133,34 +134,9 @@ export default function TreeEraView({
           </p>
         ) : (
           <div className="space-y-4">
-            {era.contentBlocks.map((block) => {
-              const data = block.data as { description?: string };
-              return (
-                <div
-                  key={block.id}
-                  className="bg-bg-secondary border border-border rounded-lg p-5 border-l-4 border-l-green-700"
-                >
-                  <h4 className="font-heading text-lg text-text-primary mb-1">
-                    {block.title}
-                  </h4>
-                  {block.subtitle && (
-                    <p className="text-text-muted text-sm mb-2">
-                      {block.subtitle}
-                    </p>
-                  )}
-                  {data.description && (
-                    <p className="text-text-primary text-sm">
-                      {data.description}
-                    </p>
-                  )}
-                  {block.isCompleted && (
-                    <span className="inline-block mt-3 text-green-400 text-xs font-heading">
-                      ✓ Completed
-                    </span>
-                  )}
-                </div>
-              );
-            })}
+            {era.contentBlocks.map((block) => (
+              <CardThemeContent key={block.id} block={block} theme="TREE" />
+            ))}
           </div>
         )}
       </section>
@@ -180,11 +156,11 @@ export default function TreeEraView({
         </section>
       )}
 
-      <section className="border-t border-border px-6 py-8 flex justify-between items-center max-w-5xl mx-auto">
+      <section className="border-t border-border px-6 py-8 flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center max-w-5xl mx-auto">
         {prevEra ? (
           <Link
             href={`/timeline/${prevEra.slug}`}
-            className="text-text-muted hover:text-accent transition"
+            className="min-h-11 flex items-center text-text-muted hover:text-accent transition break-words"
           >
             ← {prevEra.title}
           </Link>
@@ -194,7 +170,7 @@ export default function TreeEraView({
         {nextEra ? (
           <Link
             href={`/timeline/${nextEra.slug}`}
-            className="text-text-muted hover:text-accent transition"
+            className="min-h-11 flex items-center justify-end text-text-muted hover:text-accent transition break-words sm:text-right"
           >
             {nextEra.title} →
           </Link>

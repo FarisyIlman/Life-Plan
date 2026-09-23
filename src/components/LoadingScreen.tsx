@@ -12,6 +12,14 @@ export default function LoadingScreen({
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    if (prefersReducedMotion) {
+      onComplete();
+      return;
+    }
+
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
@@ -35,6 +43,8 @@ export default function LoadingScreen({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
           className="fixed inset-0 z-50 bg-bg-primary flex flex-col items-center justify-center"
+          role="status"
+          aria-live="polite"
         >
           <motion.div
             animate={{ rotate: 360 }}
@@ -58,7 +68,7 @@ export default function LoadingScreen({
             />
           </div>
 
-          <p className="text-text-muted text-sm mt-2">{progress}%</p>
+          <p className="text-text-muted text-sm mt-2">Loading {progress}%</p>
         </motion.div>
       )}
     </AnimatePresence>

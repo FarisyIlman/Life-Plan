@@ -2,9 +2,14 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import type { Era, ContentBlock } from "@prisma/client";
+import type { Era, ContentBlock, AchievementGoal } from "@prisma/client";
+import MarkdownContent from "@/components/MarkdownContent";
+import AchievementTracker from "@/components/AchievementTracker";
 
-type EraWithBlocks = Era & { contentBlocks: ContentBlock[] };
+type EraWithBlocks = Era & {
+  contentBlocks: ContentBlock[];
+  achievementGoals: AchievementGoal[];
+};
 type EraNav = { slug: string; title: string } | null;
 
 const THEME_STYLES: Record<
@@ -81,7 +86,7 @@ export default function GenericThemeView({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className={`${style.font} text-5xl md:text-6xl text-text-primary mb-4`}
+          className={`${style.font} text-4xl sm:text-5xl md:text-6xl text-text-primary mb-4 break-words`}
         >
           {era.title}
         </motion.h1>
@@ -105,6 +110,22 @@ export default function GenericThemeView({
         )}
       </section>
 
+      {era.achievementGoals.length > 0 && (
+        <section className="px-6 pb-12 max-w-4xl mx-auto">
+          {Array.from(new Set(era.achievementGoals.map((goal) => goal.year)))
+            .sort((a, b) => a - b)
+            .map((year) => (
+              <AchievementTracker
+                key={year}
+                year={year}
+                goals={era.achievementGoals.filter(
+                  (goal) => goal.year === year,
+                )}
+              />
+            ))}
+        </section>
+      )}
+
       {/* Content blocks — simple list, generic across themes */}
       <section className="px-6 pb-20 max-w-3xl mx-auto">
         {total === 0 ? (
@@ -118,6 +139,7 @@ export default function GenericThemeView({
                 description?: string;
                 techStack?: string;
                 responsibilities?: string;
+                textColor?: string;
               };
               return (
                 <div
@@ -142,9 +164,12 @@ export default function GenericThemeView({
                     </p>
                   )}
                   {data.description && (
-                    <p className="text-text-primary text-sm">
-                      {data.description}
-                    </p>
+                    <div
+                      className="text-text-primary text-sm mb-4"
+                      style={{ color: data.textColor || undefined }}
+                    >
+                      <MarkdownContent content={data.description} />
+                    </div>
                   )}
                   {block.isCompleted && (
                     <span className="inline-block mt-3 text-green-400 text-xs font-heading">

@@ -45,3 +45,31 @@ test("content block validation rejects invalid deadlines", () => {
 
   assert.equal(result.success, false);
 });
+
+test("content block validation rejects invalid text colors", () => {
+  const result = contentBlockSchema.safeParse({
+    eraId: "era-1",
+    type: "card",
+    title: "A block",
+    textColor: "red",
+    isPublished: "false",
+    isCompleted: "false",
+    order: "0",
+  });
+
+  assert.equal(result.success, false);
+});
+
+test("content block validation accepts hex text colors", () => {
+  const result = contentBlockSchema.safeParse({
+    eraId: "era-1",
+    type: "card",
+    title: "A block",
+    textColor: "#12AbEF",
+    isPublished: "false",
+    isCompleted: "false",
+    order: "0",
+  });
+
+  assert.equal(result.success, true);
+});

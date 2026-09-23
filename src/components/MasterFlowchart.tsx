@@ -58,21 +58,33 @@ export default function MasterFlowchart({
   }
 
   return (
-    <div
-      style={{ height: 500 }}
-      className="bg-bg-secondary border border-border rounded-lg"
-    >
-      <ReactFlow
-        nodes={toReactFlowNodes(dbNodes)}
-        edges={toReactFlowEdges(dbNodes)}
-        nodesDraggable={false}
-        nodesConnectable={false}
-        elementsSelectable={false}
-        fitView
-      >
-        <Background color="#2A2E3F" gap={16} />
-        <Controls showInteractive={false} />
-      </ReactFlow>
+    <div className="bg-bg-secondary border border-border rounded-lg">
+      <div className="h-[360px] sm:h-[500px]">
+        <ReactFlow
+          nodes={toReactFlowNodes(dbNodes)}
+          edges={toReactFlowEdges(dbNodes)}
+          nodesDraggable={false}
+          nodesConnectable={false}
+          elementsSelectable={false}
+          fitView
+        >
+          <Background color="#2A2E3F" gap={16} />
+          <Controls showInteractive={false} />
+        </ReactFlow>
+      </div>
+      <details className="border-t border-border p-3 sm:hidden">
+        <summary className="cursor-pointer text-sm text-text-muted">
+          View nodes as a list
+        </summary>
+        <ul className="mt-3 space-y-2">
+          {dbNodes.map((node) => (
+            <li key={node.id} className="text-sm text-text-primary break-words">
+              <span className="text-text-muted">{node.nodeType}:</span>{" "}
+              {node.label}
+            </li>
+          ))}
+        </ul>
+      </details>
     </div>
   );
 }

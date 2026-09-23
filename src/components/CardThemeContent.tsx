@@ -1,74 +1,93 @@
 "use client";
 
-import { motion } from "framer-motion";
 import type { ContentBlock } from "@prisma/client";
 import type { ContentBlockPreview } from "@/lib/types";
 import MarkdownContent from "@/components/MarkdownContent";
 
-export default function CardMonthlyTheme({
+type Theme = "VOYAGE" | "TREE" | "GENERIC";
+
+export default function CardThemeContent({
   block,
+  theme,
 }: {
   block: ContentBlock | ContentBlockPreview;
+  theme: Theme;
 }) {
-  const data = block.data as {
+  const data = (block.data ?? {}) as {
     description?: string;
     techStack?: string;
     responsibilities?: string;
     textColor?: string;
   };
+  const themeStyles = {
+    VOYAGE: {
+      accent: "#0D9488",
+      font: "font-voyage",
+      label: "Tech Stack",
+    },
+    TREE: {
+      accent: "#166534",
+      font: "font-heading",
+      label: "Responsibilities",
+    },
+    GENERIC: {
+      accent: "#7C6FEF",
+      font: "font-heading",
+      label: "Details",
+    },
+  }[theme];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.5 }}
+    <div
       className="bg-bg-secondary border border-border rounded-lg p-5 border-l-4"
-      style={{ borderLeftColor: "#3B82F6" }}
+      style={{ borderLeftColor: themeStyles.accent }}
     >
       {block.deadline && (
-        <p className="text-monthly-blue text-xs mb-1 font-heading">
+        <p
+          className={`text-xs mb-1 ${themeStyles.font}`}
+          style={{ color: themeStyles.accent }}
+        >
           {new Date(block.deadline).toLocaleDateString("en-GB")}
         </p>
       )}
-
-      <h3
-        className="font-heading text-lg mb-1"
+      <h4
+        className={`${themeStyles.font} text-lg text-text-primary mb-1`}
         style={{ color: data.textColor || undefined }}
       >
         {block.title}
-      </h3>
+      </h4>
       {block.subtitle && (
-        <p className="text-text-muted text-sm mb-3">{block.subtitle}</p>
+        <p className="text-text-muted text-sm mb-2">{block.subtitle}</p>
       )}
-
-      {data.description && (
+      {data.description ? (
         <div
           className="text-text-primary text-sm mb-4"
           style={{ color: data.textColor || undefined }}
         >
           <MarkdownContent content={data.description} />
         </div>
+      ) : (
+        <p className="text-text-muted text-sm mb-4">No description provided.</p>
       )}
-
       {data.techStack && (
         <p className="text-text-muted text-xs mb-1">
-          <span className="text-monthly-blue">Tech:</span> {data.techStack}
+          <span style={{ color: themeStyles.accent }}>Tech:</span>{" "}
+          {data.techStack}
         </p>
       )}
-
       {data.responsibilities && (
         <p className="text-text-muted text-xs">
-          <span className="text-monthly-blue">Tasks:</span>{" "}
+          <span style={{ color: themeStyles.accent }}>
+            {themeStyles.label}:
+          </span>{" "}
           {data.responsibilities}
         </p>
       )}
-
       {block.isCompleted && (
         <span className="inline-block mt-3 text-green-400 text-xs font-heading">
           ✓ Completed
         </span>
       )}
-    </motion.div>
+    </div>
   );
 }

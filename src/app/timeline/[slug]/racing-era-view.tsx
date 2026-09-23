@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import type { Era, ContentBlock, AchievementGoal } from "@prisma/client";
 import AchievementTracker from "@/components/AchievementTracker";
+import MarkdownContent from "@/components/MarkdownContent";
 
 type EraWithData = Era & {
   contentBlocks: ContentBlock[];
@@ -36,9 +37,9 @@ export default function RacingEraView({
     totalGoals > 0 ? Math.round((achievedGoals / totalGoals) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-bg-primary relative overflow-hidden">
+    <div className="min-h-screen bg-bg-primary relative">
       {/* Racing background accent */}
-      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-red-600/10 via-transparent to-transparent" />
+      <div className="absolute inset-0 -z-10 bg-linear-to-b from-red-600/10 via-transparent to-transparent" />
 
       <div className="px-6 pt-20">
         <Link
@@ -57,7 +58,7 @@ export default function RacingEraView({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="font-racing text-5xl md:text-6xl text-text-primary mb-4"
+          className="font-racing text-4xl sm:text-5xl md:text-6xl text-text-primary mb-4 break-words"
         >
           {era.title}
         </motion.h1>
@@ -105,7 +106,10 @@ export default function RacingEraView({
           </h3>
           <div className="space-y-3">
             {era.contentBlocks.map((block) => {
-              const data = block.data as { description?: string };
+              const data = block.data as {
+                description?: string;
+                textColor?: string;
+              };
               return (
                 <div
                   key={block.id}
@@ -113,9 +117,12 @@ export default function RacingEraView({
                 >
                   <h4 className="text-text-primary text-sm">{block.title}</h4>
                   {data.description && (
-                    <p className="text-text-muted text-sm mt-1">
-                      {data.description}
-                    </p>
+                    <div
+                      className="text-text-primary text-sm mb-4"
+                      style={{ color: data.textColor || undefined }}
+                    >
+                      <MarkdownContent content={data.description} />
+                    </div>
                   )}
                 </div>
               );
@@ -124,11 +131,11 @@ export default function RacingEraView({
         </section>
       )}
 
-      <section className="border-t border-border px-6 py-8 flex justify-between items-center max-w-5xl mx-auto">
+      <section className="border-t border-border px-6 py-8 flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center max-w-5xl mx-auto">
         {prevEra ? (
           <Link
             href={`/timeline/${prevEra.slug}`}
-            className="text-text-muted hover:text-accent transition"
+            className="min-h-11 flex items-center text-text-muted hover:text-accent transition break-words"
           >
             ← {prevEra.title}
           </Link>
@@ -138,7 +145,7 @@ export default function RacingEraView({
         {nextEra ? (
           <Link
             href={`/timeline/${nextEra.slug}`}
-            className="text-text-muted hover:text-accent transition"
+            className="min-h-11 flex items-center justify-end text-text-muted hover:text-accent transition break-words sm:text-right"
           >
             {nextEra.title} →
           </Link>

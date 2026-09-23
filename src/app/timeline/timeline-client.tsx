@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { Era } from "@prisma/client";
 import SmoothScrollProvider from "@/components/SmoothScrollProvider";
@@ -17,6 +17,7 @@ const THEME_COLORS: Record<string, string> = {
 export default function TimelineClient({ eras }: { eras: Era[] }) {
   const sectionRefs = useRef<(HTMLElement | null)[]>([]);
   const bgRef = useRef<HTMLDivElement | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -48,6 +49,28 @@ export default function TimelineClient({ eras }: { eras: Era[] }) {
     return () => ctx.revert();
   }, [eras]);
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visibleEntry = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (!visibleEntry) return;
+        const index = sectionRefs.current.indexOf(
+          visibleEntry.target as HTMLElement,
+        );
+        if (index >= 0) setActiveIndex(index);
+      },
+      { rootMargin: "-35% 0px -35%", threshold: [0.2, 0.5, 0.8] },
+    );
+
+    sectionRefs.current.forEach((section) => {
+      if (section) observer.observe(section);
+    });
+
+    return () => observer.disconnect();
+  }, [eras.length]);
+
   const scrollToSection = (index: number) => {
     sectionRefs.current[index]?.scrollIntoView({ behavior: "smooth" });
   };
@@ -63,14 +86,14 @@ export default function TimelineClient({ eras }: { eras: Era[] }) {
         />
 
         {/* Dot navigation */}
-        <div className="fixed right-6 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-3">
+        <div className="fixed right-1 sm:right-6 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-1">
           {eras.map((era, i) => {
             const color = THEME_COLORS[era.theme] || "#7C6FEF";
             return (
               <button
                 key={era.id}
                 onClick={() => scrollToSection(i)}
-                className="w-3 h-3 rounded-full border transition hover:scale-125"
+                className="min-h-11 min-w-11 flex items-center justify-center rounded-full transition hover:scale-110"
                 style={{ borderColor: color }}
                 onMouseEnter={(e) =>
                   (e.currentTarget.style.backgroundColor = color)
@@ -79,7 +102,18 @@ export default function TimelineClient({ eras }: { eras: Era[] }) {
                   (e.currentTarget.style.backgroundColor = "transparent")
                 }
                 aria-label={`Jump to ${era.title}`}
-              />
+                aria-current={activeIndex === i ? "true" : undefined}
+              >
+                <span
+                  className={`block h-3 w-3 rounded-full border transition ${
+                    activeIndex === i ? "scale-125" : ""
+                  }`}
+                  style={{
+                    borderColor: color,
+                    backgroundColor: activeIndex === i ? color : "transparent",
+                  }}
+                />
+              </button>
             );
           })}
         </div>

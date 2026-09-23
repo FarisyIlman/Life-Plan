@@ -50,3 +50,21 @@
     scroll-behavior: auto !important;
   }
 }
+
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  p,
+  a,
+  td,
+  th {
+    overflow-wrap: anywhere;
+  }
+}

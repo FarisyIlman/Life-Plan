@@ -9,7 +9,13 @@ export const contentBlockSchema = z.object({
   description: z.string().optional(),
   techStack: z.string().optional(),
   responsibilities: z.string().optional(),
-  textColor: z.string().optional(),
+  textColor: z
+    .string()
+    .optional()
+    .refine(
+      (value) => !value || /^#[0-9A-Fa-f]{6}$/.test(value),
+      "Text color must be a 6-digit hex color",
+    ),
   month: z
     .string()
     .optional()
@@ -24,6 +30,8 @@ export const contentBlockSchema = z.object({
   order: z.coerce.number().int().default(0),
   isPublished: strictBoolean,
   isCompleted: strictBoolean,
+  imageUrl: z.string().optional(),
+  imageCaption: z.string().optional(),
 });
 
 export type ContentBlockInput = z.infer<typeof contentBlockSchema>;

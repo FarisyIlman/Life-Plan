@@ -12,6 +12,8 @@ function buildData(parsed: {
   responsibilities?: string;
   month?: number;
   textColor?: string;
+  imageUrl?: string;
+  imageCaption?: string;
 }) {
   return {
     description: parsed.description || "",
@@ -19,6 +21,8 @@ function buildData(parsed: {
     responsibilities: parsed.responsibilities || "",
     month: parsed.month || null,
     textColor: parsed.textColor || null,
+    imageUrl: parsed.imageUrl || null,
+    imageCaption: parsed.imageCaption || null,
   };
 }
 
@@ -47,6 +51,8 @@ export async function createContentBlock(formData: FormData) {
     responsibilities,
     month,
     textColor,
+    imageUrl,
+    imageCaption,
   } = parsed.data;
 
   try {
@@ -62,6 +68,8 @@ export async function createContentBlock(formData: FormData) {
           responsibilities,
           month,
           textColor,
+          imageUrl,
+          imageCaption,
         }),
         deadline: deadline ? new Date(deadline) : null,
         order,
@@ -102,6 +110,8 @@ export async function updateContentBlock(id: string, formData: FormData) {
     responsibilities,
     month,
     textColor,
+    imageUrl,
+    imageCaption,
   } = parsed.data;
 
   try {
@@ -118,6 +128,8 @@ export async function updateContentBlock(id: string, formData: FormData) {
           responsibilities,
           month,
           textColor,
+          imageUrl,
+          imageCaption,
         }),
         deadline: deadline ? new Date(deadline) : null,
         order,

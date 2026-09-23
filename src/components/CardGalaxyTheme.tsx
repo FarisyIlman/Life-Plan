@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import type { ContentBlock } from "@prisma/client";
 import type { ContentBlockPreview } from "@/lib/types";
+import MarkdownContent from "@/components/MarkdownContent";
 
 export default function CardGalaxyTheme({
   block,
@@ -44,12 +45,12 @@ export default function CardGalaxyTheme({
       )}
 
       {data.description && (
-        <p
+        <div
           className="text-text-primary text-sm mb-4"
           style={{ color: data.textColor || undefined }}
         >
-          {data.description}
-        </p>
+          <MarkdownContent content={data.description} />
+        </div>
       )}
 
       {data.techStack && (
