@@ -1,6 +1,7 @@
 "use client";
 
 import type { ContentBlock } from "@prisma/client";
+import Image from "next/image";
 import type { ContentBlockPreview } from "@/lib/types";
 import MarkdownContent from "@/components/MarkdownContent";
 
@@ -23,6 +24,8 @@ export default function CardThemeContent({
     techStack?: string;
     responsibilities?: string;
     textColor?: string;
+    imageUrl?: string;
+    imageCaption?: string;
   };
   const isPrivate = data.visibility === "PRIVATE";
   const isSummary = data.visibility === "SUMMARY";
@@ -67,6 +70,23 @@ export default function CardThemeContent({
       </h4>
       {block.subtitle && (
         <p className="text-text-muted text-sm mb-2">{block.subtitle}</p>
+      )}
+      {data.imageUrl && !isPrivate && !isSummary && (
+        <figure className="mb-4 overflow-hidden rounded border border-border">
+          <Image
+            src={data.imageUrl}
+            alt={data.imageCaption || block.title}
+            width={800}
+            height={450}
+            className="h-auto max-h-64 w-full object-cover"
+            unoptimized
+          />
+          {data.imageCaption && (
+            <figcaption className="px-3 py-2 text-xs text-text-muted">
+              {data.imageCaption}
+            </figcaption>
+          )}
+        </figure>
       )}
       {data.description ? (
         <div

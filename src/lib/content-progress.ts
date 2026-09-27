@@ -1,22 +1,31 @@
 import type { ContentBlock } from "@prisma/client";
 
-type ContentData = { visibility?: "PUBLIC" | "SUMMARY" | "PRIVATE" };
+export type ContentVisibility = "PUBLIC" | "SUMMARY" | "PRIVATE";
+type ContentData = { visibility?: ContentVisibility };
 
-function getContentData(block: ContentBlock): ContentData {
-  return typeof block.data === "object" && block.data !== null
-    ? (block.data as ContentData)
-    : {};
+function getContentData(data: unknown): ContentData {
+  return typeof data === "object" && data !== null ? (data as ContentData) : {};
 }
 
-export function isPublicContentBlock(block: ContentBlock) {
-  return getContentData(block).visibility !== "PRIVATE";
+export function getContentVisibility(data: unknown): ContentVisibility {
+  return getContentData(data).visibility || "PUBLIC";
 }
 
-export function getPublicContentBlocks(blocks: ContentBlock[]) {
+export function isPublicContentBlock<T extends Pick<ContentBlock, "data">>(
+  block: T,
+) {
+  return getContentVisibility(block.data) !== "PRIVATE";
+}
+
+export function getPublicContentBlocks<T extends Pick<ContentBlock, "data">>(
+  blocks: T[],
+) {
   return blocks.filter(isPublicContentBlock);
 }
 
-export function getContentProgress(blocks: ContentBlock[]) {
+export function getContentProgress<
+  T extends Pick<ContentBlock, "data" | "isCompleted">,
+>(blocks: T[]) {
   const publicBlocks = getPublicContentBlocks(blocks);
   const completed = publicBlocks.filter((block) => block.isCompleted).length;
 

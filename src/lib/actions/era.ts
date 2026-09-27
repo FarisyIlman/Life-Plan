@@ -5,6 +5,7 @@ import { eraSchema } from "@/lib/validations/era";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/../auth";
 import { getPrismaErrorMessage } from "@/lib/prisma-error";
+import { logActivity } from "@/lib/activity-log";
 
 export async function createEra(formData: FormData) {
   const session = await auth();
@@ -128,7 +129,15 @@ export async function permanentlyDeleteEra(id: string) {
   if (!session?.user?.id) throw new Error("Unauthorized");
 
   try {
+    const era = await prisma.era.findUnique({ where: { id } });
     await prisma.era.delete({ where: { id } });
+    await logActivity({
+      adminId: session.user.id,
+      action: "PERMANENT_DELETE",
+      entityType: "Era",
+      entityId: id,
+      detail: { title: era?.title },
+    });
     revalidatePath("/admin/trash");
     return { success: true };
   } catch (error) {
@@ -146,6 +155,14 @@ export async function reorderEras(orderedIds: string[]) {
         prisma.era.update({ where: { id }, data: { order: index } }),
       ),
     );
+
+    await logActivity({
+      adminId: session.user.id,
+      action: "REORDER",
+      entityType: "Era",
+      entityId: "batch",
+      detail: { count: orderedIds.length },
+    });
 
     revalidatePath("/admin/eras");
     return { success: true };

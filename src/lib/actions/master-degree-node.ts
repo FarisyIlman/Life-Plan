@@ -5,6 +5,7 @@ import { masterDegreeNodeSchema } from "@/lib/validations/master-degree-node";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/../auth";
 import { getPrismaErrorMessage } from "@/lib/prisma-error";
+import { logActivity } from "@/lib/activity-log";
 
 function buildDetails(parsed: {
   cost?: string;
@@ -38,7 +39,7 @@ export async function createMasterDegreeNode(formData: FormData) {
   }
 
   try {
-    await prisma.masterDegreeNode.create({
+    const node = await prisma.masterDegreeNode.create({
       data: {
         label: parsed.data.label,
         nodeType: parsed.data.nodeType,
@@ -47,6 +48,13 @@ export async function createMasterDegreeNode(formData: FormData) {
         positionY: parsed.data.positionY,
         details: buildDetails(parsed.data),
       },
+    });
+    await logActivity({
+      adminId: session.user.id,
+      action: "CREATE",
+      entityType: "MasterDegreeNode",
+      entityId: node.id,
+      detail: { label: node.label, nodeType: node.nodeType },
     });
     revalidatePath("/admin/master-degree");
     revalidatePath("/timeline/[slug]", "page");
@@ -61,9 +69,16 @@ export async function updateNodePosition(id: string, x: number, y: number) {
   if (!session?.user) throw new Error("Unauthorized");
 
   try {
-    await prisma.masterDegreeNode.update({
+    const node = await prisma.masterDegreeNode.update({
       where: { id },
       data: { positionX: x, positionY: y },
+    });
+    await logActivity({
+      adminId: session.user.id,
+      action: "UPDATE_POSITION",
+      entityType: "MasterDegreeNode",
+      entityId: id,
+      detail: { label: node.label, positionX: x, positionY: y },
     });
     revalidatePath("/admin/master-degree");
     revalidatePath("/timeline/[slug]", "page");
@@ -85,7 +100,7 @@ export async function updateMasterDegreeNode(id: string, formData: FormData) {
   }
 
   try {
-    await prisma.masterDegreeNode.update({
+    const node = await prisma.masterDegreeNode.update({
       where: { id },
       data: {
         label: parsed.data.label,
@@ -95,6 +110,13 @@ export async function updateMasterDegreeNode(id: string, formData: FormData) {
         positionY: parsed.data.positionY,
         details: buildDetails(parsed.data),
       },
+    });
+    await logActivity({
+      adminId: session.user.id,
+      action: "UPDATE",
+      entityType: "MasterDegreeNode",
+      entityId: id,
+      detail: { label: node.label, nodeType: node.nodeType },
     });
     revalidatePath("/admin/master-degree");
     revalidatePath("/timeline/[slug]", "page");
@@ -109,7 +131,15 @@ export async function deleteMasterDegreeNode(id: string) {
   if (!session?.user) throw new Error("Unauthorized");
 
   try {
+    const node = await prisma.masterDegreeNode.findUnique({ where: { id } });
     await prisma.masterDegreeNode.delete({ where: { id } });
+    await logActivity({
+      adminId: session.user.id,
+      action: "DELETE",
+      entityType: "MasterDegreeNode",
+      entityId: id,
+      detail: { label: node?.label, nodeType: node?.nodeType },
+    });
     revalidatePath("/admin/master-degree");
     revalidatePath("/timeline/[slug]", "page");
     return { success: true };

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
+import { getPublicContentBlocks } from "@/lib/content-progress";
 import TimelineClient from "./timeline-client";
 
 export const metadata: Metadata = {
@@ -22,19 +23,19 @@ export default async function TimelinePage() {
 
   const summary = eras.reduce(
     (result, era) => {
+      const publicBlocks = getPublicContentBlocks(era.contentBlocks);
       result.goals += era.achievementGoals.length;
-      result.projects += era.contentBlocks.length;
-      result.completed += era.contentBlocks.filter(
+      result.projects += publicBlocks.length;
+      result.completed += publicBlocks.filter(
         (block) => block.isCompleted,
       ).length;
-      result.evidence += era.contentBlocks.filter((block) => {
+      result.evidence += publicBlocks.filter((block) => {
         const data = block.data as {
           evidenceUrl?: string;
-          visibility?: string;
         };
-        return Boolean(data.evidenceUrl) && data.visibility !== "PRIVATE";
+        return Boolean(data.evidenceUrl);
       }).length;
-      result.upcoming += era.contentBlocks.filter(
+      result.upcoming += publicBlocks.filter(
         (block) => block.deadline && block.deadline >= new Date(),
       ).length;
       return result;

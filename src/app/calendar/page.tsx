@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import PublicCalendarGrid from "./public-calendar-grid";
 import Link from "next/link";
+import { getPublicContentBlocks } from "@/lib/content-progress";
 
 export const metadata: Metadata = {
   title: "Calendar — Farisy's Life Journey",
@@ -30,7 +31,7 @@ export default async function PublicCalendarPage({
       ? parsedMonth
       : now.getMonth();
 
-  const blocks = await prisma.contentBlock.findMany({
+  const allBlocks = await prisma.contentBlock.findMany({
     where: {
       deadline: { not: null },
       isPublished: true,
@@ -40,6 +41,7 @@ export default async function PublicCalendarPage({
     include: { era: { select: { title: true, slug: true } } },
     orderBy: { deadline: "asc" },
   });
+  const blocks = getPublicContentBlocks(allBlocks);
 
   const prevMonth = month === 0 ? 11 : month - 1;
   const prevYear = month === 0 ? year - 1 : year;

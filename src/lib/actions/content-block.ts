@@ -5,6 +5,15 @@ import { contentBlockSchema } from "@/lib/validations/content-block";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/../auth";
 import { getPrismaErrorMessage } from "@/lib/prisma-error";
+import {
+  getContentBlockDataSchema,
+  type ContentBlockType,
+} from "@/lib/validations/content-block-data";
+import { logActivity } from "@/lib/activity-log";
+import {
+  createCompletionNotification,
+  createCompletionNotifications,
+} from "@/lib/actions/notification";
 
 function buildData(parsed: {
   description?: string;
@@ -18,7 +27,7 @@ function buildData(parsed: {
   textColor?: string;
   imageUrl?: string;
   imageCaption?: string;
-}) {
+}): Record<string, unknown> {
   return {
     description: parsed.description || "",
     why: parsed.why || "",
@@ -32,6 +41,13 @@ function buildData(parsed: {
     imageUrl: parsed.imageUrl || null,
     imageCaption: parsed.imageCaption || null,
   };
+}
+
+function parseContentBlockData(
+  type: ContentBlockType,
+  parsed: Parameters<typeof buildData>[0],
+) {
+  return getContentBlockDataSchema(type).safeParse(buildData(parsed));
 }
 
 export async function createContentBlock(formData: FormData) {
@@ -67,34 +83,48 @@ export async function createContentBlock(formData: FormData) {
     imageUrl,
     imageCaption,
   } = parsed.data;
+  const dataResult = parseContentBlockData(type, {
+    description,
+    why,
+    nextAction,
+    evidenceUrl,
+    visibility,
+    techStack,
+    responsibilities,
+    month,
+    textColor,
+    imageUrl,
+    imageCaption,
+  });
+
+  if (!dataResult.success) {
+    return { error: dataResult.error.flatten().fieldErrors };
+  }
 
   try {
-    await prisma.contentBlock.create({
+    const block = await prisma.contentBlock.create({
       data: {
         eraId,
         type,
         title,
         subtitle: subtitle || null,
         achievementGoalId: achievementGoalId || null,
-        data: buildData({
-          description,
-          why,
-          nextAction,
-          evidenceUrl,
-          visibility,
-          techStack,
-          responsibilities,
-          month,
-          textColor,
-          imageUrl,
-          imageCaption,
-        }),
+        data: dataResult.data,
         deadline: deadline ? new Date(deadline) : null,
         order,
         isPublished,
         isCompleted,
       },
     });
+
+    await logActivity({
+      adminId: session.user.id,
+      action: "CREATE",
+      entityType: "ContentBlock",
+      entityId: block.id,
+      detail: { title: block.title, type: block.type },
+    });
+    if (block.isCompleted) await createCompletionNotification(block.id);
 
     revalidatePath("/admin/content-blocks");
     return { success: true };
@@ -136,9 +166,26 @@ export async function updateContentBlock(id: string, formData: FormData) {
     imageUrl,
     imageCaption,
   } = parsed.data;
+  const dataResult = parseContentBlockData(type, {
+    description,
+    why,
+    nextAction,
+    evidenceUrl,
+    visibility,
+    techStack,
+    responsibilities,
+    month,
+    textColor,
+    imageUrl,
+    imageCaption,
+  });
+
+  if (!dataResult.success) {
+    return { error: dataResult.error.flatten().fieldErrors };
+  }
 
   try {
-    await prisma.contentBlock.update({
+    const block = await prisma.contentBlock.update({
       where: { id },
       data: {
         eraId,
@@ -146,25 +193,22 @@ export async function updateContentBlock(id: string, formData: FormData) {
         title,
         subtitle: subtitle || null,
         achievementGoalId: achievementGoalId || null,
-        data: buildData({
-          description,
-          why,
-          nextAction,
-          evidenceUrl,
-          visibility,
-          techStack,
-          responsibilities,
-          month,
-          textColor,
-          imageUrl,
-          imageCaption,
-        }),
+        data: dataResult.data,
         deadline: deadline ? new Date(deadline) : null,
         order,
         isPublished,
         isCompleted,
       },
     });
+
+    await logActivity({
+      adminId: session.user.id,
+      action: "UPDATE",
+      entityType: "ContentBlock",
+      entityId: id,
+      detail: { title: block.title, type: block.type },
+    });
+    if (block.isCompleted) await createCompletionNotification(block.id);
 
     revalidatePath("/admin/content-blocks");
     return { success: true };
@@ -178,9 +222,17 @@ export async function deleteContentBlock(id: string) {
   if (!session?.user) throw new Error("Unauthorized");
 
   try {
-    await prisma.contentBlock.update({
+    const block = await prisma.contentBlock.update({
       where: { id },
       data: { deletedAt: new Date() },
+    });
+
+    await logActivity({
+      adminId: session.user.id,
+      action: "DELETE",
+      entityType: "ContentBlock",
+      entityId: id,
+      detail: { title: block.title },
     });
 
     revalidatePath("/admin/content-blocks");
@@ -195,9 +247,17 @@ export async function restoreContentBlock(id: string) {
   if (!session?.user) throw new Error("Unauthorized");
 
   try {
-    await prisma.contentBlock.update({
+    const block = await prisma.contentBlock.update({
       where: { id },
       data: { deletedAt: null },
+    });
+
+    await logActivity({
+      adminId: session.user.id,
+      action: "RESTORE",
+      entityType: "ContentBlock",
+      entityId: id,
+      detail: { title: block.title },
     });
 
     revalidatePath("/admin/content-blocks");
@@ -213,7 +273,16 @@ export async function permanentlyDeleteContentBlock(id: string) {
   if (!session?.user) throw new Error("Unauthorized");
 
   try {
+    const block = await prisma.contentBlock.findUnique({ where: { id } });
     await prisma.contentBlock.delete({ where: { id } });
+
+    await logActivity({
+      adminId: session.user.id,
+      action: "PERMANENT_DELETE",
+      entityType: "ContentBlock",
+      entityId: id,
+      detail: { title: block?.title },
+    });
     revalidatePath("/admin/trash");
     return { success: true };
   } catch (error) {
@@ -234,14 +303,14 @@ export async function toggleContentBlockComplete(id: string) {
       data: { isCompleted: !block.isCompleted },
     });
 
-    await prisma.activityLog.create({
-      data: {
-        adminId: session.user.id,
-        action: updated.isCompleted ? "MARK_COMPLETE" : "MARK_PENDING",
-        entityType: "ContentBlock",
-        entityId: id,
-        detail: { title: block.title },
-      },
+    if (updated.isCompleted) await createCompletionNotification(id);
+
+    await logActivity({
+      adminId: session.user.id,
+      action: updated.isCompleted ? "MARK_COMPLETE" : "MARK_PENDING",
+      entityType: "ContentBlock",
+      entityId: id,
+      detail: { title: block.title },
     });
 
     revalidatePath("/admin/content-blocks");
@@ -263,6 +332,14 @@ export async function reorderContentBlocks(orderedIds: string[]) {
       ),
     );
 
+    await logActivity({
+      adminId: session.user.id,
+      action: "REORDER",
+      entityType: "ContentBlock",
+      entityId: "batch",
+      detail: { count: orderedIds.length },
+    });
+
     revalidatePath("/admin/content-blocks");
     return { success: true };
   } catch (error) {
@@ -278,9 +355,16 @@ export async function bulkPublishContentBlocks(
   if (!session?.user) throw new Error("Unauthorized");
 
   try {
-    await prisma.contentBlock.updateMany({
+    const result = await prisma.contentBlock.updateMany({
       where: { id: { in: ids } },
       data: { isPublished: publish },
+    });
+    await logActivity({
+      adminId: session.user.id,
+      action: publish ? "BULK_PUBLISH" : "BULK_UNPUBLISH",
+      entityType: "ContentBlock",
+      entityId: ids.join(","),
+      detail: { count: result.count },
     });
     revalidatePath("/admin/content-blocks");
     return { success: true };
@@ -299,14 +383,14 @@ export async function bulkMarkComplete(ids: string[], completed: boolean) {
       data: { isCompleted: completed },
     });
 
-    await prisma.activityLog.create({
-      data: {
-        adminId: session.user.id,
-        action: completed ? "BULK_MARK_COMPLETE" : "BULK_MARK_PENDING",
-        entityType: "ContentBlock",
-        entityId: ids.join(","),
-        detail: { count: ids.length },
-      },
+    if (completed) await createCompletionNotifications(ids);
+
+    await logActivity({
+      adminId: session.user.id,
+      action: completed ? "BULK_MARK_COMPLETE" : "BULK_MARK_PENDING",
+      entityType: "ContentBlock",
+      entityId: ids.join(","),
+      detail: { count: ids.length },
     });
 
     revalidatePath("/admin/content-blocks");
@@ -321,9 +405,16 @@ export async function bulkDeleteContentBlocks(ids: string[]) {
   if (!session?.user) throw new Error("Unauthorized");
 
   try {
-    await prisma.contentBlock.updateMany({
+    const result = await prisma.contentBlock.updateMany({
       where: { id: { in: ids } },
       data: { deletedAt: new Date() },
+    });
+    await logActivity({
+      adminId: session.user.id,
+      action: "BULK_DELETE",
+      entityType: "ContentBlock",
+      entityId: ids.join(","),
+      detail: { count: result.count },
     });
     revalidatePath("/admin/content-blocks");
     return { success: true };

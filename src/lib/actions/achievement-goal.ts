@@ -5,6 +5,7 @@ import { achievementGoalSchema } from "@/lib/validations/achievement-goal";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/../auth";
 import { getPrismaErrorMessage } from "@/lib/prisma-error";
+import { logActivity } from "@/lib/activity-log";
 
 export async function createAchievementGoal(formData: FormData) {
   const session = await auth();
@@ -18,7 +19,7 @@ export async function createAchievementGoal(formData: FormData) {
   }
 
   try {
-    await prisma.achievementGoal.create({
+    const goal = await prisma.achievementGoal.create({
       data: {
         ...parsed.data,
         imageUrl: parsed.data.imageUrl || null,
@@ -26,14 +27,12 @@ export async function createAchievementGoal(formData: FormData) {
       },
     });
 
-    await prisma.activityLog.create({
-      data: {
-        adminId: session.user.id,
-        action: "CREATE",
-        entityType: "AchievementGoal",
-        entityId: "new",
-        detail: { year: parsed.data.year, category: parsed.data.category },
-      },
+    await logActivity({
+      adminId: session.user.id,
+      action: "CREATE",
+      entityType: "AchievementGoal",
+      entityId: goal.id,
+      detail: { year: parsed.data.year, category: parsed.data.category },
     });
 
     revalidatePath("/admin/achievements");
@@ -64,14 +63,12 @@ export async function updateAchievementGoal(id: string, formData: FormData) {
       },
     });
 
-    await prisma.activityLog.create({
-      data: {
-        adminId: session.user.id,
-        action: "UPDATE",
-        entityType: "AchievementGoal",
-        entityId: id,
-        detail: { year: parsed.data.year, category: parsed.data.category },
-      },
+    await logActivity({
+      adminId: session.user.id,
+      action: "UPDATE",
+      entityType: "AchievementGoal",
+      entityId: id,
+      detail: { year: parsed.data.year, category: parsed.data.category },
     });
 
     revalidatePath("/admin/achievements");
@@ -86,7 +83,15 @@ export async function deleteAchievementGoal(id: string) {
   if (!session?.user?.id) throw new Error("Unauthorized");
 
   try {
+    const goal = await prisma.achievementGoal.findUnique({ where: { id } });
     await prisma.achievementGoal.delete({ where: { id } });
+    await logActivity({
+      adminId: session.user.id,
+      action: "DELETE",
+      entityType: "AchievementGoal",
+      entityId: id,
+      detail: { year: goal?.year, category: goal?.category },
+    });
     revalidatePath("/admin/achievements");
     return { success: true };
   } catch (error) {

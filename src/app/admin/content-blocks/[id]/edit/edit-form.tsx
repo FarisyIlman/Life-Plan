@@ -8,8 +8,10 @@ import CardGalaxyTheme from "@/components/CardGalaxyTheme";
 import CardMonthlyTheme from "@/components/CardMonthlyTheme";
 import CardThemeContent from "@/components/CardThemeContent";
 import type { ContentBlockPreview } from "@/lib/types";
+import { CONTENT_BLOCK_EDITOR_TYPES } from "@/lib/validations/content-block-data";
+import { uploadToCloudinary } from "@/lib/cloudinary-upload";
 
-const TYPES = ["card", "monthly-card"] as const;
+const TYPES = CONTENT_BLOCK_EDITOR_TYPES;
 
 export default function EditContentBlockForm({
   block,
@@ -23,6 +25,8 @@ export default function EditContentBlockForm({
   const router = useRouter();
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const data = (block.data ?? {}) as {
     description?: string;
@@ -34,6 +38,8 @@ export default function EditContentBlockForm({
     responsibilities?: string;
     month?: number;
     textColor?: string;
+    imageUrl?: string;
+    imageCaption?: string;
   };
 
   const [selectedEraId, setSelectedEraId] = useState(block.eraId);
@@ -53,6 +59,8 @@ export default function EditContentBlockForm({
       : "",
     isCompleted: block.isCompleted,
     textColor: data.textColor || "",
+    imageUrl: data.imageUrl || "",
+    imageCaption: data.imageCaption || "",
   });
 
   const handleSubmit = async (formData: FormData) => {
@@ -69,6 +77,26 @@ export default function EditContentBlockForm({
     }
 
     router.push("/admin/content-blocks");
+  };
+
+  const handleImageChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setUploadError(null);
+    try {
+      const imageUrl = await uploadToCloudinary(file);
+      setPreview((current) => ({ ...current, imageUrl }));
+    } catch (error) {
+      setUploadError(
+        error instanceof Error ? error.message : "Image upload failed.",
+      );
+    } finally {
+      setUploading(false);
+    }
   };
 
   const selectedEra = eras.find((e) => e.id === selectedEraId);
@@ -90,6 +118,8 @@ export default function EditContentBlockForm({
       techStack: preview.techStack,
       responsibilities: preview.responsibilities,
       textColor: preview.textColor,
+      imageUrl: preview.imageUrl,
+      imageCaption: preview.imageCaption,
     },
   };
 
@@ -296,6 +326,42 @@ export default function EditContentBlockForm({
             <option value="SUMMARY">Summary: hide project details</option>
             <option value="PRIVATE">Private: hide from public</option>
           </select>
+        </div>
+
+        <div>
+          <label className="block text-text-muted text-sm mb-1">
+            Image (optional)
+          </label>
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={handleImageChange}
+            disabled={uploading}
+            className="block w-full text-sm text-text-muted file:mr-3 file:rounded file:border-0 file:bg-bg-secondary file:px-3 file:py-2 file:text-text-primary"
+          />
+          <input type="hidden" name="imageUrl" value={preview.imageUrl} />
+          {uploading && (
+            <p className="mt-1 text-xs text-text-muted">Uploading image...</p>
+          )}
+          {uploadError && (
+            <p className="mt-1 text-xs text-red-400">{uploadError}</p>
+          )}
+          {preview.imageUrl && (
+            <p className="mt-1 text-xs text-green-400">Image uploaded.</p>
+          )}
+          <input
+            name="imageCaption"
+            value={preview.imageCaption}
+            onChange={(e) =>
+              setPreview((current) => ({
+                ...current,
+                imageCaption: e.target.value,
+              }))
+            }
+            maxLength={240}
+            placeholder="Image caption (optional)"
+            className="mt-2 w-full rounded border border-border bg-bg-secondary p-2 text-text-primary"
+          />
         </div>
 
         <div>

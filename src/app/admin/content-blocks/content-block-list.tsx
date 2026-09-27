@@ -1,10 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { startTransition, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { ContentBlock, Era } from "@prisma/client";
-import { reorderContentBlocks } from "@/lib/actions/content-block";
+import {
+  bulkDeleteContentBlocks,
+  bulkMarkComplete,
+  bulkPublishContentBlocks,
+  reorderContentBlocks,
+} from "@/lib/actions/content-block";
 import DeleteContentBlockButton from "./delete-button";
 import ToggleCompleteButton from "./toggle-complete-button";
 
@@ -20,6 +26,56 @@ export default function ContentBlockList({
   const router = useRouter();
   const [blocks, setBlocks] = useState(initialBlocks);
   const [draggedId, setDraggedId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    startTransition(() => {
+      setBlocks(initialBlocks);
+      setSelectedIds([]);
+    });
+  }, [initialBlocks]);
+
+  const allVisibleSelected =
+    blocks.length > 0 && selectedIds.length === blocks.length;
+
+  const toggleSelected = (id: string) => {
+    setSelectedIds((current) =>
+      current.includes(id)
+        ? current.filter((selectedId) => selectedId !== id)
+        : [...current, id],
+    );
+  };
+
+  const toggleAllSelected = () => {
+    setSelectedIds(allVisibleSelected ? [] : blocks.map((block) => block.id));
+  };
+
+  const runBulkAction = async (
+    action: () => Promise<{ error?: { _form?: string[] } }>,
+    confirmation?: string,
+  ) => {
+    if (selectedIds.length === 0 || (confirmation && !confirm(confirmation))) {
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await action();
+      if (result.error) {
+        setError(result.error._form?.[0] || "Bulk action failed.");
+        return;
+      }
+      setSelectedIds([]);
+      router.refresh();
+    } catch {
+      setError("Bulk action failed.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Group by era, preserving era order of first appearance
   const grouped = new Map<string, { era: Era; items: BlockWithEra[] }>();
@@ -62,6 +118,75 @@ export default function ContentBlockList({
 
   return (
     <div className="space-y-8">
+      <div className="sticky top-4 z-20 flex flex-wrap items-center gap-2 rounded-lg border border-border bg-bg-secondary/95 p-3 shadow-lg backdrop-blur">
+        <label className="flex min-h-11 items-center gap-2 px-2 text-sm text-text-primary">
+          <input
+            type="checkbox"
+            checked={allVisibleSelected}
+            onChange={toggleAllSelected}
+            aria-label="Select all visible content blocks"
+          />
+          Select all
+        </label>
+        <span className="text-xs text-text-muted">
+          {selectedIds.length} selected
+        </span>
+        <button
+          type="button"
+          disabled={loading || selectedIds.length === 0}
+          onClick={() =>
+            runBulkAction(() => bulkPublishContentBlocks(selectedIds, true))
+          }
+          className="min-h-11 rounded border border-border px-3 text-xs text-text-primary hover:border-accent disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Publish
+        </button>
+        <button
+          type="button"
+          disabled={loading || selectedIds.length === 0}
+          onClick={() =>
+            runBulkAction(() => bulkPublishContentBlocks(selectedIds, false))
+          }
+          className="min-h-11 rounded border border-border px-3 text-xs text-text-primary hover:border-accent disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Unpublish
+        </button>
+        <button
+          type="button"
+          disabled={loading || selectedIds.length === 0}
+          onClick={() =>
+            runBulkAction(() => bulkMarkComplete(selectedIds, true))
+          }
+          className="min-h-11 rounded border border-border px-3 text-xs text-text-primary hover:border-accent disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Mark complete
+        </button>
+        <button
+          type="button"
+          disabled={loading || selectedIds.length === 0}
+          onClick={() =>
+            runBulkAction(() => bulkMarkComplete(selectedIds, false))
+          }
+          className="min-h-11 rounded border border-border px-3 text-xs text-text-primary hover:border-accent disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Mark pending
+        </button>
+        <button
+          type="button"
+          disabled={loading || selectedIds.length === 0}
+          onClick={() =>
+            runBulkAction(
+              () => bulkDeleteContentBlocks(selectedIds),
+              "Move the selected content blocks to trash?",
+            )
+          }
+          className="min-h-11 rounded border border-red-400/40 px-3 text-xs text-red-400 hover:border-red-400 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Move to trash
+        </button>
+        {error && <p className="basis-full text-xs text-red-400">{error}</p>}
+      </div>
+
       {Array.from(grouped.values()).map(({ era, items }) => (
         <div key={era.id}>
           <h3 className="font-heading text-lg text-text-primary mb-2">
@@ -71,6 +196,9 @@ export default function ContentBlockList({
             <table className="w-full border-collapse min-w-175">
               <thead>
                 <tr className="border-b border-border text-text-muted text-left text-sm">
+                  <th className="py-2 w-10">
+                    <span className="sr-only">Select</span>
+                  </th>
                   {draggable && <th className="py-2 w-8">⋮⋮</th>}
                   <th className="py-2">Type</th>
                   <th className="py-2">Title</th>
@@ -94,6 +222,14 @@ export default function ContentBlockList({
                       draggable ? "cursor-move" : ""
                     } ${draggedId === block.id ? "opacity-40" : ""}`}
                   >
+                    <td className="py-3">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.includes(block.id)}
+                        onChange={() => toggleSelected(block.id)}
+                        aria-label={`Select ${block.title}`}
+                      />
+                    </td>
                     {draggable && (
                       <td className="py-3 text-text-muted select-none">⋮⋮</td>
                     )}

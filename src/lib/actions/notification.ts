@@ -4,6 +4,43 @@ import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { auth } from "@/../auth";
 import { revalidatePath } from "next/cache";
+import { logActivity } from "@/lib/activity-log";
+
+export async function createCompletionNotification(contentBlockId: string) {
+  const block = await prisma.contentBlock.findUnique({
+    where: { id: contentBlockId },
+    select: { id: true, title: true, isCompleted: true },
+  });
+
+  if (!block?.isCompleted) return false;
+
+  try {
+    await prisma.notification.create({
+      data: {
+        contentBlockId: block.id,
+        type: "COMPLETED",
+        message: `"${block.title}" was marked complete.`,
+      },
+    });
+    return true;
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return false;
+    }
+    throw error;
+  }
+}
+
+export async function createCompletionNotifications(contentBlockIds: string[]) {
+  let created = 0;
+  for (const contentBlockId of contentBlockIds) {
+    if (await createCompletionNotification(contentBlockId)) created++;
+  }
+  return { created };
+}
 
 export async function generateDeadlineNotifications() {
   const now = new Date();
@@ -69,6 +106,13 @@ export async function markNotificationRead(id: string) {
     data: { isRead: true },
   });
 
+  await logActivity({
+    adminId: session.user.id,
+    action: "MARK_READ",
+    entityType: "Notification",
+    entityId: id,
+  });
+
   revalidatePath("/admin/notifications");
 }
 
@@ -76,9 +120,17 @@ export async function markAllNotificationsRead() {
   const session = await auth();
   if (!session?.user?.id) throw new Error("Unauthorized");
 
-  await prisma.notification.updateMany({
+  const result = await prisma.notification.updateMany({
     where: { isRead: false },
     data: { isRead: true },
+  });
+
+  await logActivity({
+    adminId: session.user.id,
+    action: "MARK_ALL_READ",
+    entityType: "Notification",
+    entityId: "all",
+    detail: { count: result.count },
   });
 
   revalidatePath("/admin/notifications");

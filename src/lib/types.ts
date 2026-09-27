@@ -13,5 +13,7 @@ export interface ContentBlockPreview {
     techStack?: string;
     responsibilities?: string;
     textColor?: string;
+    imageUrl?: string;
+    imageCaption?: string;
   };
 }
