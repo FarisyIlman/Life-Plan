@@ -6,7 +6,16 @@ export const contentBlockSchema = z.object({
   type: z.string().min(1, "Type is required"),
   title: z.string().min(1, "Title is required"),
   subtitle: z.string().optional(),
+  achievementGoalId: z.string().optional(),
   description: z.string().optional(),
+  why: z.string().optional(),
+  nextAction: z.string().optional(),
+  evidenceUrl: z
+    .string()
+    .url("Evidence URL must be valid")
+    .or(z.literal(""))
+    .optional(),
+  visibility: z.enum(["PUBLIC", "SUMMARY", "PRIVATE"]).default("PUBLIC"),
   techStack: z.string().optional(),
   responsibilities: z.string().optional(),
   textColor: z

@@ -119,6 +119,103 @@ export default function EditEraForm({ era }: { era: Era }) {
       </div>
 
       <div>
+        <label className="block text-text-muted text-sm mb-1">Era thesis</label>
+        <textarea
+          name="thesis"
+          rows={2}
+          defaultValue={era.thesis ?? ""}
+          placeholder="What is this era trying to prove?"
+          className="w-full p-2 rounded bg-bg-secondary border border-border text-text-primary"
+        />
+      </div>
+
+      <div>
+        <label className="block text-text-muted text-sm mb-1">Trade-off</label>
+        <textarea
+          name="tradeOff"
+          rows={2}
+          defaultValue={era.tradeOff ?? ""}
+          placeholder="What are you deliberately giving up?"
+          className="w-full p-2 rounded bg-bg-secondary border border-border text-text-primary"
+        />
+      </div>
+
+      <div>
+        <label className="block text-text-muted text-sm mb-1">
+          Success indicators
+        </label>
+        <textarea
+          name="successIndicators"
+          rows={2}
+          defaultValue={era.successIndicators ?? ""}
+          placeholder="How will you know this era worked?"
+          className="w-full p-2 rounded bg-bg-secondary border border-border text-text-primary"
+        />
+      </div>
+
+      <div>
+        <label className="block text-text-muted text-sm mb-1">
+          Retrospective
+        </label>
+        <textarea
+          name="retrospective"
+          rows={2}
+          defaultValue={era.retrospective ?? ""}
+          placeholder="What did you learn after the era?"
+          className="w-full p-2 rounded bg-bg-secondary border border-border text-text-primary"
+        />
+      </div>
+
+      <div>
+        <label className="block text-text-muted text-sm mb-1">
+          Founder name
+        </label>
+        <input
+          name="founderName"
+          defaultValue={era.founderName ?? ""}
+          placeholder="Farisy"
+          className="w-full p-2 rounded bg-bg-secondary border border-border text-text-primary"
+        />
+      </div>
+
+      <div>
+        <label className="block text-text-muted text-sm mb-1">
+          Holding name
+        </label>
+        <input
+          name="holdingName"
+          defaultValue={era.holdingName ?? ""}
+          placeholder="My Holding Company"
+          className="w-full p-2 rounded bg-bg-secondary border border-border text-text-primary"
+        />
+      </div>
+
+      <div>
+        <label className="block text-text-muted text-sm mb-1">
+          Operating company name
+        </label>
+        <input
+          name="operatingName"
+          defaultValue={era.operatingName ?? ""}
+          placeholder="The Company"
+          className="w-full p-2 rounded bg-bg-secondary border border-border text-text-primary"
+        />
+      </div>
+
+      <div>
+        <label className="block text-text-muted text-sm mb-1">
+          Founding partners
+        </label>
+        <textarea
+          name="foundingPartners"
+          rows={2}
+          defaultValue={era.foundingPartners ?? ""}
+          placeholder="Farisy, Umar, Ucup"
+          className="w-full p-2 rounded bg-bg-secondary border border-border text-text-primary"
+        />
+      </div>
+
+      <div>
         <label className="block text-text-muted text-sm mb-1">Order</label>
         <input
           name="order"

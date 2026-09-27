@@ -38,6 +38,11 @@ export default async function EraDetailPage({
       contentBlocks: {
         where: { isPublished: true, deletedAt: null },
         orderBy: { order: "asc" },
+        include: {
+          achievementGoal: {
+            select: { year: true, category: true, status: true },
+          },
+        },
       },
       achievementGoals: {
         orderBy: [{ year: "asc" }, { category: "asc" }],
@@ -46,6 +51,19 @@ export default async function EraDetailPage({
   });
 
   if (!era || !era.isPublished) notFound();
+
+  const eraWithGoalContext = {
+    ...era,
+    contentBlocks: era.contentBlocks.map((block) => ({
+      ...block,
+      data: {
+        ...(typeof block.data === "object" && block.data !== null
+          ? block.data
+          : {}),
+        linkedGoal: block.achievementGoal,
+      },
+    })),
+  };
 
   const allEras = await prisma.era.findMany({
     where: { isPublished: true, deletedAt: null },
@@ -59,18 +77,36 @@ export default async function EraDetailPage({
 
   switch (era.theme) {
     case "GALAXY":
-      return <GalaxyEraView era={era} prevEra={prevEra} nextEra={nextEra} />;
+      return (
+        <GalaxyEraView
+          era={eraWithGoalContext}
+          prevEra={prevEra}
+          nextEra={nextEra}
+        />
+      );
     case "MONTHLY":
-      return <MonthlyEraView era={era} prevEra={prevEra} nextEra={nextEra} />;
+      return (
+        <MonthlyEraView
+          era={eraWithGoalContext}
+          prevEra={prevEra}
+          nextEra={nextEra}
+        />
+      );
     case "RACING":
-      return <RacingEraView era={era} prevEra={prevEra} nextEra={nextEra} />;
+      return (
+        <RacingEraView
+          era={eraWithGoalContext}
+          prevEra={prevEra}
+          nextEra={nextEra}
+        />
+      );
     case "VOYAGE": {
       const flowchartNodes = await prisma.masterDegreeNode.findMany({
         orderBy: { createdAt: "asc" },
       });
       return (
         <VoyageEraView
-          era={era}
+          era={eraWithGoalContext}
           prevEra={prevEra}
           nextEra={nextEra}
           flowchartNodes={flowchartNodes}
@@ -78,8 +114,20 @@ export default async function EraDetailPage({
       );
     }
     case "TREE":
-      return <TreeEraView era={era} prevEra={prevEra} nextEra={nextEra} />;
+      return (
+        <TreeEraView
+          era={eraWithGoalContext}
+          prevEra={prevEra}
+          nextEra={nextEra}
+        />
+      );
     default:
-      return <TreeEraView era={era} prevEra={prevEra} nextEra={nextEra} />;
+      return (
+        <TreeEraView
+          era={eraWithGoalContext}
+          prevEra={prevEra}
+          nextEra={nextEra}
+        />
+      );
   }
 }

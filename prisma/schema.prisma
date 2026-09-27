@@ -36,6 +36,14 @@ model Era {
   startYear   Int
   endYear     Int
   description String?  @db.Text
+  thesis String? @db.Text
+  tradeOff String? @db.Text
+  successIndicators String? @db.Text
+  retrospective String? @db.Text
+  founderName String?
+  holdingName String?
+  operatingName String?
+  foundingPartners String? @db.Text
   isPublished Boolean  @default(false)
   order       Int
   deletedAt   DateTime?
@@ -73,6 +81,9 @@ model ContentBlock {
   deadline    DateTime?
   isCompleted Boolean      @default(false)
 
+  achievementGoalId String?
+  achievementGoal   AchievementGoal? @relation(fields: [achievementGoalId], references: [id], onDelete: SetNull)
+
   order       Int
   isPublished Boolean      @default(false)
   deletedAt   DateTime?
@@ -83,6 +94,7 @@ model ContentBlock {
   notifications Notification[]
 
   @@index([eraId])
+  @@index([achievementGoalId])
   @@index([deadline])
   @@map("content_blocks")
 }
@@ -109,6 +121,8 @@ model AchievementGoal {
   note            String?  @db.Text
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  contentBlocks   ContentBlock[]
 
   @@unique([eraId, year, category])
   @@map("achievement_goals")
@@ -184,6 +198,7 @@ model MasterDegreeNode {
   id        String   @id @default(cuid())
   label     String
   nodeType  String
+  details   Json?
   positionX Float
   positionY Float
 

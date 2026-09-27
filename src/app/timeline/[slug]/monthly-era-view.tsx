@@ -5,6 +5,11 @@ import { motion } from "framer-motion";
 import type { Era, ContentBlock, AchievementGoal } from "@prisma/client";
 import CardMonthlyTheme from "@/components/CardMonthlyTheme";
 import AchievementTracker from "@/components/AchievementTracker";
+import EraReflection from "@/components/EraReflection";
+import {
+  getContentProgress,
+  getPublicContentBlocks,
+} from "@/lib/content-progress";
 
 type EraWithBlocks = Era & {
   contentBlocks: ContentBlock[];
@@ -36,18 +41,25 @@ export default function MonthlyEraView({
   prevEra: EraNav;
   nextEra: EraNav;
 }) {
-  const total = era.contentBlocks.length;
-  const completed = era.contentBlocks.filter((b) => b.isCompleted).length;
-  const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
+  const publicBlocks = getPublicContentBlocks(era.contentBlocks);
+  const { total, percentage: progress } = getContentProgress(era.contentBlocks);
 
   // Group content blocks by month
   const blocksByMonth: Record<number, ContentBlock[]> = {};
-  for (const block of era.contentBlocks) {
+  for (const block of publicBlocks) {
     const data = block.data as { month?: number };
     const month = data.month ?? 0;
-    if (!blocksByMonth[month]) blocksByMonth[month] = [];
-    blocksByMonth[month].push(block);
+    const bucket = month >= 1 && month <= 12 ? month : 0;
+    if (!blocksByMonth[bucket]) blocksByMonth[bucket] = [];
+    blocksByMonth[bucket].push(block);
   }
+
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1;
+  const isEraPast = era.endYear < currentYear;
+  const isEraFuture = era.startYear > currentYear;
+  const isCurrentEra = !isEraPast && !isEraFuture;
 
   return (
     <div className="min-h-screen bg-bg-primary">
@@ -86,7 +98,14 @@ export default function MonthlyEraView({
               <span>Progress</span>
               <span>{progress}%</span>
             </div>
-            <div className="h-2 bg-bg-secondary rounded-full overflow-hidden">
+            <div
+              className="h-2 bg-bg-secondary rounded-full overflow-hidden"
+              role="progressbar"
+              aria-label="Year progress"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={progress}
+            >
               <div
                 className="h-full bg-monthly-blue transition-all duration-700"
                 style={{ width: `${progress}%` }}
@@ -95,6 +114,14 @@ export default function MonthlyEraView({
           </div>
         )}
       </section>
+
+      <EraReflection
+        thesis={era.thesis}
+        tradeOff={era.tradeOff}
+        successIndicators={era.successIndicators}
+        retrospective={era.retrospective}
+        accent="#3B82F6"
+      />
 
       {/* Monthly grid */}
       <section className="px-6 pb-20 max-w-6xl mx-auto">
@@ -108,12 +135,39 @@ export default function MonthlyEraView({
               const monthNum = i + 1;
               const blocks = blocksByMonth[monthNum];
               if (!blocks || blocks.length === 0) return null;
+              const completed = blocks.filter(
+                (block) => block.isCompleted,
+              ).length;
+              const isCurrent = isCurrentEra && monthNum === currentMonth;
+              const isPast =
+                isEraPast || (isCurrentEra && monthNum < currentMonth);
 
               return (
-                <div key={monthNum}>
-                  <h3 className="font-heading text-xl text-text-primary mb-3 border-b border-border pb-2">
-                    {monthName}
-                  </h3>
+                <div
+                  key={monthNum}
+                  className={`relative ${isCurrent ? "md:-translate-y-2" : ""}`}
+                >
+                  <div
+                    className={`mb-3 border-b pb-2 ${isCurrent ? "border-monthly-blue" : "border-border"}`}
+                  >
+                    <div className="flex items-end justify-between gap-3">
+                      <h3 className="font-heading text-xl text-text-primary">
+                        {monthName}
+                      </h3>
+                      <span className="text-xs text-text-muted">
+                        {completed}/{blocks.length} done
+                      </span>
+                    </div>
+                    <p
+                      className={`text-[11px] uppercase tracking-wider mt-1 ${isCurrent ? "text-monthly-blue" : isPast ? "text-text-muted" : "text-text-muted"}`}
+                    >
+                      {isCurrent
+                        ? "Current month"
+                        : isPast
+                          ? "Past cadence"
+                          : "Upcoming"}
+                    </p>
+                  </div>
                   <div className="space-y-3">
                     {blocks.map((block) => (
                       <CardMonthlyTheme key={block.id} block={block} />
@@ -127,7 +181,7 @@ export default function MonthlyEraView({
             {blocksByMonth[0] && blocksByMonth[0].length > 0 && (
               <div>
                 <h3 className="font-heading text-xl text-text-muted mb-3 border-b border-border pb-2">
-                  Unscheduled
+                  Unscheduled / needs a date
                 </h3>
                 <div className="space-y-3">
                   {blocksByMonth[0].map((block) => (
@@ -150,6 +204,7 @@ export default function MonthlyEraView({
                 key={year}
                 year={year}
                 goals={era.achievementGoals.filter((g) => g.year === year)}
+                theme="MONTHLY"
               />
             ))}
         </section>

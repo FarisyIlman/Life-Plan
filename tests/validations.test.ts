@@ -73,3 +73,33 @@ test("content block validation accepts hex text colors", () => {
 
   assert.equal(result.success, true);
 });
+
+test("content block visibility defaults to public", () => {
+  const result = contentBlockSchema.safeParse({
+    eraId: "era-1",
+    type: "card",
+    title: "A block",
+    isPublished: "false",
+    isCompleted: "false",
+    order: "0",
+  });
+
+  assert.equal(result.success, true);
+  if (result.success) assert.equal(result.data.visibility, "PUBLIC");
+});
+
+test("content block validation accepts supported visibility modes", () => {
+  for (const visibility of ["PUBLIC", "SUMMARY", "PRIVATE"]) {
+    const result = contentBlockSchema.safeParse({
+      eraId: "era-1",
+      type: "card",
+      title: "A block",
+      visibility,
+      isPublished: "false",
+      isCompleted: "false",
+      order: "0",
+    });
+
+    assert.equal(result.success, true);
+  }
+});

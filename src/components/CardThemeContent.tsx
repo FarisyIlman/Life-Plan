@@ -15,23 +15,32 @@ export default function CardThemeContent({
 }) {
   const data = (block.data ?? {}) as {
     description?: string;
+    why?: string;
+    nextAction?: string;
+    evidenceUrl?: string;
+    visibility?: "PUBLIC" | "SUMMARY" | "PRIVATE";
+    linkedGoal?: { year: number; category: string; status: string } | null;
     techStack?: string;
     responsibilities?: string;
     textColor?: string;
   };
+  const isPrivate = data.visibility === "PRIVATE";
+  const isSummary = data.visibility === "SUMMARY";
+
+  if (isPrivate) return null;
   const themeStyles = {
     VOYAGE: {
-      accent: "#0D9488",
+      accent: "var(--color-theme-voyage)",
       font: "font-voyage",
       label: "Tech Stack",
     },
     TREE: {
-      accent: "#166534",
+      accent: "var(--color-theme-tree)",
       font: "font-heading",
       label: "Responsibilities",
     },
     GENERIC: {
-      accent: "#7C6FEF",
+      accent: "var(--color-accent)",
       font: "font-heading",
       label: "Details",
     },
@@ -69,19 +78,48 @@ export default function CardThemeContent({
       ) : (
         <p className="text-text-muted text-sm mb-4">No description provided.</p>
       )}
-      {data.techStack && (
+      {data.why && (
+        <p className="text-text-muted text-sm mb-3">
+          <span style={{ color: themeStyles.accent }}>Why it matters:</span>{" "}
+          {data.why}
+        </p>
+      )}
+      {data.linkedGoal && (
+        <p className="text-text-muted text-xs mb-3">
+          <span style={{ color: themeStyles.accent }}>Supports goal:</span>{" "}
+          {data.linkedGoal.year} {data.linkedGoal.category.replaceAll("_", " ")}
+        </p>
+      )}
+      {data.techStack && !isPrivate && !isSummary && (
         <p className="text-text-muted text-xs mb-1">
           <span style={{ color: themeStyles.accent }}>Tech:</span>{" "}
           {data.techStack}
         </p>
       )}
-      {data.responsibilities && (
+      {data.responsibilities && !isPrivate && !isSummary && (
         <p className="text-text-muted text-xs">
           <span style={{ color: themeStyles.accent }}>
             {themeStyles.label}:
           </span>{" "}
           {data.responsibilities}
         </p>
+      )}
+      {data.nextAction && !isPrivate && !isSummary && (
+        <p className="text-text-muted text-sm mt-3">
+          <span style={{ color: themeStyles.accent }}>Next action:</span>{" "}
+          {data.nextAction}
+        </p>
+      )}
+      {data.evidenceUrl && !isPrivate && !isSummary && (
+        <a
+          href={data.evidenceUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-block mt-4 text-xs font-heading hover:underline"
+          style={{ color: themeStyles.accent }}
+        >
+          View evidence ↗
+        </a>
       )}
       {block.isCompleted && (
         <span className="inline-block mt-3 text-green-400 text-xs font-heading">

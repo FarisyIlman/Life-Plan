@@ -6,6 +6,26 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/../auth";
 import { getPrismaErrorMessage } from "@/lib/prisma-error";
 
+function buildDetails(parsed: {
+  cost?: string;
+  requirements?: string;
+  deadline?: string;
+  pros?: string;
+  cons?: string;
+  rationale?: string;
+  confidence?: number;
+}) {
+  return {
+    cost: parsed.cost || "",
+    requirements: parsed.requirements || "",
+    deadline: parsed.deadline || "",
+    pros: parsed.pros || "",
+    cons: parsed.cons || "",
+    rationale: parsed.rationale || "",
+    confidence: parsed.confidence ?? null,
+  };
+}
+
 export async function createMasterDegreeNode(formData: FormData) {
   const session = await auth();
   if (!session?.user) throw new Error("Unauthorized");
@@ -18,7 +38,16 @@ export async function createMasterDegreeNode(formData: FormData) {
   }
 
   try {
-    await prisma.masterDegreeNode.create({ data: parsed.data });
+    await prisma.masterDegreeNode.create({
+      data: {
+        label: parsed.data.label,
+        nodeType: parsed.data.nodeType,
+        parentId: parsed.data.parentId,
+        positionX: parsed.data.positionX,
+        positionY: parsed.data.positionY,
+        details: buildDetails(parsed.data),
+      },
+    });
     revalidatePath("/admin/master-degree");
     revalidatePath("/timeline/[slug]", "page");
     return { success: true };
@@ -56,7 +85,17 @@ export async function updateMasterDegreeNode(id: string, formData: FormData) {
   }
 
   try {
-    await prisma.masterDegreeNode.update({ where: { id }, data: parsed.data });
+    await prisma.masterDegreeNode.update({
+      where: { id },
+      data: {
+        label: parsed.data.label,
+        nodeType: parsed.data.nodeType,
+        parentId: parsed.data.parentId,
+        positionX: parsed.data.positionX,
+        positionY: parsed.data.positionY,
+        details: buildDetails(parsed.data),
+      },
+    });
     revalidatePath("/admin/master-degree");
     revalidatePath("/timeline/[slug]", "page");
     return { success: true };

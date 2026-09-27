@@ -137,10 +137,23 @@ export default function GenericThemeView({
             {era.contentBlocks.map((block) => {
               const data = block.data as {
                 description?: string;
+                why?: string;
+                nextAction?: string;
+                evidenceUrl?: string;
+                visibility?: "PUBLIC" | "SUMMARY" | "PRIVATE";
+                linkedGoal?: {
+                  year: number;
+                  category: string;
+                  status: string;
+                } | null;
                 techStack?: string;
                 responsibilities?: string;
                 textColor?: string;
               };
+              const isPrivate = data.visibility === "PRIVATE";
+              const isSummary = data.visibility === "SUMMARY";
+
+              if (isPrivate) return null;
               return (
                 <div
                   key={block.id}
@@ -170,6 +183,40 @@ export default function GenericThemeView({
                     >
                       <MarkdownContent content={data.description} />
                     </div>
+                  )}
+                  {data.why && (
+                    <p className="text-text-muted text-sm mb-3">
+                      <span style={{ color: style.accent }}>
+                        Why it matters:
+                      </span>{" "}
+                      {data.why}
+                    </p>
+                  )}
+                  {data.linkedGoal && (
+                    <p className="text-text-muted text-xs mb-3">
+                      <span style={{ color: style.accent }}>
+                        Supports goal:
+                      </span>{" "}
+                      {data.linkedGoal.year}{" "}
+                      {data.linkedGoal.category.replaceAll("_", " ")}
+                    </p>
+                  )}
+                  {data.nextAction && !isPrivate && !isSummary && (
+                    <p className="text-text-muted text-sm mb-3">
+                      <span style={{ color: style.accent }}>Next action:</span>{" "}
+                      {data.nextAction}
+                    </p>
+                  )}
+                  {data.evidenceUrl && !isPrivate && !isSummary && (
+                    <a
+                      href={data.evidenceUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-block mt-1 text-xs font-heading hover:underline"
+                      style={{ color: style.accent }}
+                    >
+                      View evidence ↗
+                    </a>
                   )}
                   {block.isCompleted && (
                     <span className="inline-block mt-3 text-green-400 text-xs font-heading">

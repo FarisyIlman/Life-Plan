@@ -12,10 +12,19 @@ export default function CardMonthlyTheme({
 }) {
   const data = block.data as {
     description?: string;
+    why?: string;
+    nextAction?: string;
+    evidenceUrl?: string;
+    visibility?: "PUBLIC" | "SUMMARY" | "PRIVATE";
+    linkedGoal?: { year: number; category: string; status: string } | null;
     techStack?: string;
     responsibilities?: string;
     textColor?: string;
   };
+  const isPrivate = data.visibility === "PRIVATE";
+  const isSummary = data.visibility === "SUMMARY";
+
+  if (isPrivate) return null;
 
   return (
     <motion.div
@@ -24,7 +33,7 @@ export default function CardMonthlyTheme({
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.5 }}
       className="bg-bg-secondary border border-border rounded-lg p-5 border-l-4"
-      style={{ borderLeftColor: "#3B82F6" }}
+      style={{ borderLeftColor: "var(--color-theme-monthly)" }}
     >
       {block.deadline && (
         <p className="text-monthly-blue text-xs mb-1 font-heading">
@@ -51,17 +60,51 @@ export default function CardMonthlyTheme({
         </div>
       )}
 
-      {data.techStack && (
+      {data.why && (
+        <p className="text-text-muted text-sm mb-3">
+          <span className="text-monthly-blue font-heading">WHY IT MATTERS</span>
+          <br />
+          {data.why}
+        </p>
+      )}
+
+      {data.linkedGoal && (
+        <p className="text-text-muted text-xs mb-3">
+          <span className="text-monthly-blue font-heading">SUPPORTS GOAL</span>{" "}
+          {data.linkedGoal.year} {data.linkedGoal.category.replaceAll("_", " ")}
+        </p>
+      )}
+
+      {data.techStack && !isPrivate && !isSummary && (
         <p className="text-text-muted text-xs mb-1">
           <span className="text-monthly-blue">Tech:</span> {data.techStack}
         </p>
       )}
 
-      {data.responsibilities && (
+      {data.responsibilities && !isPrivate && !isSummary && (
         <p className="text-text-muted text-xs">
           <span className="text-monthly-blue">Tasks:</span>{" "}
           {data.responsibilities}
         </p>
+      )}
+
+      {data.nextAction && !isPrivate && !isSummary && (
+        <p className="text-text-muted text-sm mt-3">
+          <span className="text-monthly-blue font-heading">NEXT ACTION</span>
+          <br />
+          {data.nextAction}
+        </p>
+      )}
+
+      {data.evidenceUrl && !isPrivate && !isSummary && (
+        <a
+          href={data.evidenceUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-block mt-4 text-monthly-blue text-xs font-heading hover:underline"
+        >
+          View evidence ↗
+        </a>
       )}
 
       {block.isCompleted && (

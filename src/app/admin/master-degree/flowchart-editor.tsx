@@ -22,10 +22,10 @@ import {
 } from "@/lib/actions/master-degree-node";
 
 const NODE_TYPE_COLORS: Record<string, string> = {
-  root: "#7C6FEF",
-  country: "#1E3A8A",
-  university: "#0D9488",
-  program: "#D97706",
+  root: "var(--color-accent)",
+  country: "var(--color-voyage-navy)",
+  university: "var(--color-theme-voyage)",
+  program: "var(--color-voyage-gold)",
 };
 
 function toReactFlowNodes(dbNodes: PrismaNode[]): Node[] {
@@ -34,9 +34,9 @@ function toReactFlowNodes(dbNodes: PrismaNode[]): Node[] {
     position: { x: n.positionX, y: n.positionY },
     data: { label: n.label },
     style: {
-      background: NODE_TYPE_COLORS[n.nodeType] || "#2A2E3F",
-      color: "#E8E9ED",
-      border: "1px solid #2A2E3F",
+      background: NODE_TYPE_COLORS[n.nodeType] || "var(--color-bg-secondary)",
+      color: "var(--color-text-primary)",
+      border: "1px solid var(--color-border)",
       borderRadius: 8,
       padding: 10,
       fontSize: 13,
@@ -51,7 +51,7 @@ function toReactFlowEdges(dbNodes: PrismaNode[]): Edge[] {
       id: `${n.parentId}-${n.id}`,
       source: n.parentId!,
       target: n.id,
-      style: { stroke: "#7C6FEF" },
+      style: { stroke: "var(--color-accent)" },
     }));
 }
 
@@ -73,6 +73,15 @@ export default function FlowchartEditor({
     "root" | "country" | "university" | "program"
   >("country");
   const [newParentId, setNewParentId] = useState("");
+  const [newDetails, setNewDetails] = useState({
+    cost: "",
+    requirements: "",
+    deadline: "",
+    pros: "",
+    cons: "",
+    rationale: "",
+    confidence: "",
+  });
 
   const handleNodesChange = useCallback(
     (changes: NodeChange[]) => {
@@ -99,6 +108,9 @@ export default function FlowchartEditor({
     formData.set("positionX", String(100 + Math.random() * 400));
     formData.set("positionY", String(100 + Math.random() * 300));
     if (newParentId) formData.set("parentId", newParentId);
+    Object.entries(newDetails).forEach(([key, value]) => {
+      if (value) formData.set(key, value);
+    });
 
     const res = await createMasterDegreeNode(formData);
     if (res?.success) {
@@ -125,6 +137,96 @@ export default function FlowchartEditor({
             onChange={(e) => setNewLabel(e.target.value)}
             placeholder="Singapore"
             className="p-2 rounded bg-bg-primary border border-border text-text-primary text-sm"
+          />
+        </div>
+        <div className="min-w-64 flex-1">
+          <label className="block text-text-muted text-xs mb-1">
+            Cost / tuition
+          </label>
+          <input
+            value={newDetails.cost}
+            onChange={(e) =>
+              setNewDetails((d) => ({ ...d, cost: e.target.value }))
+            }
+            placeholder="Rp 120.000.000"
+            className="w-full p-2 rounded bg-bg-primary border border-border text-text-primary text-sm"
+          />
+        </div>
+        <div className="min-w-64 flex-1">
+          <label className="block text-text-muted text-xs mb-1">
+            Requirements
+          </label>
+          <input
+            value={newDetails.requirements}
+            onChange={(e) =>
+              setNewDetails((d) => ({ ...d, requirements: e.target.value }))
+            }
+            placeholder="IELTS 6.5, portfolio"
+            className="w-full p-2 rounded bg-bg-primary border border-border text-text-primary text-sm"
+          />
+        </div>
+        <div className="min-w-48">
+          <label className="block text-text-muted text-xs mb-1">
+            Application deadline
+          </label>
+          <input
+            type="date"
+            value={newDetails.deadline}
+            onChange={(e) =>
+              setNewDetails((d) => ({ ...d, deadline: e.target.value }))
+            }
+            className="w-full p-2 rounded bg-bg-primary border border-border text-text-primary text-sm"
+          />
+        </div>
+        <div className="min-w-48">
+          <label className="block text-text-muted text-xs mb-1">
+            Confidence (0-100)
+          </label>
+          <input
+            type="number"
+            min={0}
+            max={100}
+            value={newDetails.confidence}
+            onChange={(e) =>
+              setNewDetails((d) => ({ ...d, confidence: e.target.value }))
+            }
+            placeholder="70"
+            className="w-full p-2 rounded bg-bg-primary border border-border text-text-primary text-sm"
+          />
+        </div>
+        <div className="min-w-64 flex-1">
+          <label className="block text-text-muted text-xs mb-1">Pros</label>
+          <input
+            value={newDetails.pros}
+            onChange={(e) =>
+              setNewDetails((d) => ({ ...d, pros: e.target.value }))
+            }
+            placeholder="Research fit, funding"
+            className="w-full p-2 rounded bg-bg-primary border border-border text-text-primary text-sm"
+          />
+        </div>
+        <div className="min-w-64 flex-1">
+          <label className="block text-text-muted text-xs mb-1">Cons</label>
+          <input
+            value={newDetails.cons}
+            onChange={(e) =>
+              setNewDetails((d) => ({ ...d, cons: e.target.value }))
+            }
+            placeholder="High living costs"
+            className="w-full p-2 rounded bg-bg-primary border border-border text-text-primary text-sm"
+          />
+        </div>
+        <div className="min-w-64 flex-1">
+          <label className="block text-text-muted text-xs mb-1">
+            Why this option?
+          </label>
+          <input
+            value={newDetails.rationale}
+            onChange={(e) =>
+              setNewDetails((d) => ({ ...d, rationale: e.target.value }))
+            }
+            placeholder="Best fit for the long-term plan"
+            className="w-full p-2 rounded bg-bg-primary border border-border text-text-primary text-sm"
           />
         </div>
         <div>
@@ -183,8 +285,10 @@ export default function FlowchartEditor({
           <Background color="#2A2E3F" gap={16} />
           <Controls />
           <MiniMap
-            nodeColor={(n) => (n.style?.background as string) || "#2A2E3F"}
-            style={{ background: "#1A1D29" }}
+            nodeColor={(n) =>
+              (n.style?.background as string) || "var(--color-bg-secondary)"
+            }
+            style={{ background: "var(--color-bg-secondary)" }}
           />
         </ReactFlow>
       </div>

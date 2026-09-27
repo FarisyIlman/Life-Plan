@@ -12,8 +12,10 @@ const TYPES = ["card", "monthly-card"] as const;
 
 export default function NewContentBlockForm({
   eras,
+  goals,
 }: {
   eras: { id: string; title: string; theme: string }[];
+  goals: { id: string; eraId: string; year: number; category: string }[];
 }) {
   const router = useRouter();
   const [errors, setErrors] = useState<Record<string, string[]>>({});
@@ -25,6 +27,10 @@ export default function NewContentBlockForm({
     title: "",
     subtitle: "",
     description: "",
+    why: "",
+    nextAction: "",
+    evidenceUrl: "",
+    visibility: "PUBLIC" as "PUBLIC" | "SUMMARY" | "PRIVATE",
     techStack: "",
     responsibilities: "",
     deadline: "",
@@ -49,6 +55,7 @@ export default function NewContentBlockForm({
   };
 
   const selectedEra = eras.find((e) => e.id === selectedEraId);
+  const eraGoals = goals.filter((goal) => goal.eraId === selectedEraId);
   const theme = selectedEra?.theme || "GALAXY";
 
   const previewBlock: ContentBlockPreview = {
@@ -59,6 +66,10 @@ export default function NewContentBlockForm({
     isCompleted: preview.isCompleted,
     data: {
       description: preview.description,
+      why: preview.why,
+      nextAction: preview.nextAction,
+      evidenceUrl: preview.evidenceUrl,
+      visibility: preview.visibility,
       techStack: preview.techStack,
       responsibilities: preview.responsibilities,
       textColor: preview.textColor,
@@ -129,6 +140,24 @@ export default function NewContentBlockForm({
 
         <div>
           <label className="block text-text-muted text-sm mb-1">
+            Supports goal (optional)
+          </label>
+          <select
+            name="achievementGoalId"
+            defaultValue=""
+            className="w-full p-2 rounded bg-bg-secondary border border-border text-text-primary"
+          >
+            <option value="">No linked goal</option>
+            {eraGoals.map((goal) => (
+              <option key={goal.id} value={goal.id}>
+                {goal.year} - {goal.category.replaceAll("_", " ")}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-text-muted text-sm mb-1">
             Month (only for Monthly theme, 1-12)
           </label>
           <input
@@ -182,6 +211,75 @@ export default function NewContentBlockForm({
             }
             className="w-full p-2 rounded bg-bg-secondary border border-border text-text-primary"
           />
+        </div>
+
+        <div>
+          <label className="block text-text-muted text-sm mb-1">
+            Why it matters
+          </label>
+          <textarea
+            name="why"
+            rows={2}
+            placeholder="How does this move the bigger life or career plan forward?"
+            value={preview.why}
+            onChange={(e) => setPreview((p) => ({ ...p, why: e.target.value }))}
+            className="w-full p-2 rounded bg-bg-secondary border border-border text-text-primary"
+          />
+        </div>
+
+        <div>
+          <label className="block text-text-muted text-sm mb-1">
+            Next action
+          </label>
+          <input
+            name="nextAction"
+            placeholder="What is the next observable step?"
+            value={preview.nextAction}
+            onChange={(e) =>
+              setPreview((p) => ({ ...p, nextAction: e.target.value }))
+            }
+            className="w-full p-2 rounded bg-bg-secondary border border-border text-text-primary"
+          />
+        </div>
+
+        <div>
+          <label className="block text-text-muted text-sm mb-1">
+            Evidence URL
+          </label>
+          <input
+            name="evidenceUrl"
+            type="url"
+            placeholder="https://github.com/... or https://..."
+            value={preview.evidenceUrl}
+            onChange={(e) =>
+              setPreview((p) => ({ ...p, evidenceUrl: e.target.value }))
+            }
+            className="w-full p-2 rounded bg-bg-secondary border border-border text-text-primary"
+          />
+          {errors.evidenceUrl && (
+            <p className="text-red-400 text-sm mt-1">{errors.evidenceUrl[0]}</p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-text-muted text-sm mb-1">
+            Public visibility
+          </label>
+          <select
+            name="visibility"
+            value={preview.visibility}
+            onChange={(e) =>
+              setPreview((p) => ({
+                ...p,
+                visibility: e.target.value as "PUBLIC" | "SUMMARY" | "PRIVATE",
+              }))
+            }
+            className="w-full p-2 rounded bg-bg-secondary border border-border text-text-primary"
+          >
+            <option value="PUBLIC">Public: show full details</option>
+            <option value="SUMMARY">Summary: hide project details</option>
+            <option value="PRIVATE">Private: hide from public</option>
+          </select>
         </div>
 
         <div>

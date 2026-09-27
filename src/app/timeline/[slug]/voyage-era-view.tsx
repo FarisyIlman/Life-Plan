@@ -10,7 +10,12 @@ import type {
 } from "@prisma/client";
 import MasterFlowchart from "@/components/MasterFlowchart";
 import AchievementTracker from "@/components/AchievementTracker";
+import EraReflection from "@/components/EraReflection";
 import CardThemeContent from "@/components/CardThemeContent";
+import {
+  getContentProgress,
+  getPublicContentBlocks,
+} from "@/lib/content-progress";
 
 type EraWithData = Era & {
   contentBlocks: ContentBlock[];
@@ -29,9 +34,8 @@ export default function VoyageEraView({
   nextEra: EraNav;
   flowchartNodes: MasterDegreeNode[];
 }) {
-  const total = era.contentBlocks.length;
-  const completed = era.contentBlocks.filter((b) => b.isCompleted).length;
-  const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
+  const { total, percentage: progress } = getContentProgress(era.contentBlocks);
+  const publicContentBlocks = getPublicContentBlocks(era.contentBlocks);
 
   return (
     <div className="min-h-screen bg-bg-primary relative">
@@ -71,7 +75,14 @@ export default function VoyageEraView({
               <span>Journey Progress</span>
               <span>{progress}%</span>
             </div>
-            <div className="h-2 bg-bg-secondary rounded-full overflow-hidden">
+            <div
+              className="h-2 bg-bg-secondary rounded-full overflow-hidden"
+              role="progressbar"
+              aria-label="Journey progress"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={progress}
+            >
               <div
                 className="h-full bg-voyage-teal transition-all duration-700"
                 style={{ width: `${progress}%` }}
@@ -81,19 +92,49 @@ export default function VoyageEraView({
         )}
       </section>
 
+      <EraReflection
+        thesis={era.thesis}
+        tradeOff={era.tradeOff}
+        successIndicators={era.successIndicators}
+        retrospective={era.retrospective}
+        accent="#0D9488"
+        fontClassName="font-voyage"
+      />
+
       {/* Master's Degree Flowchart */}
       <section className="px-6 pb-12 max-w-5xl mx-auto">
         <h3 className="font-voyage text-2xl text-text-primary mb-4 text-center">
           Charting the Destination
         </h3>
+        <div
+          className="flex flex-wrap justify-center gap-x-5 gap-y-2 mb-4 text-xs text-text-muted"
+          aria-label="Route legend"
+        >
+          <span>
+            <span className="inline-block h-2 w-2 rounded-full bg-accent mr-2" />
+            Origin
+          </span>
+          <span>
+            <span className="inline-block h-2 w-2 rounded-full bg-voyage-navy mr-2" />
+            Country
+          </span>
+          <span>
+            <span className="inline-block h-2 w-2 rounded-full bg-voyage-teal mr-2" />
+            University
+          </span>
+          <span>
+            <span className="inline-block h-2 w-2 rounded-full bg-voyage-gold mr-2" />
+            Program
+          </span>
+        </div>
         <MasterFlowchart nodes={flowchartNodes} />
       </section>
 
       {/* Content blocks */}
-      {total > 0 && (
+      {publicContentBlocks.length > 0 && (
         <section className="px-6 pb-20 max-w-3xl mx-auto">
           <div className="space-y-4">
-            {era.contentBlocks.map((block) => (
+            {publicContentBlocks.map((block) => (
               <CardThemeContent key={block.id} block={block} theme="VOYAGE" />
             ))}
           </div>
@@ -110,6 +151,7 @@ export default function VoyageEraView({
                 key={year}
                 year={year}
                 goals={era.achievementGoals.filter((g) => g.year === year)}
+                theme="VOYAGE"
               />
             ))}
         </section>

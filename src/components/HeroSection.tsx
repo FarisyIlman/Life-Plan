@@ -69,7 +69,8 @@ export default function HeroSection() {
         transition={{ duration: 0.8, delay: 0.1 }}
         className="font-heading text-4xl sm:text-5xl md:text-7xl lg:text-8xl text-text-primary mb-6 leading-[1.05] max-w-4xl"
       >
-        Imagine a life <span className="text-accent">planned out loud</span>
+        Build the life you can{" "}
+        <span className="text-accent">show your work for</span>
       </motion.h1>
 
       <motion.p
@@ -78,8 +79,8 @@ export default function HeroSection() {
         transition={{ duration: 0.8, delay: 0.2 }}
         className="font-body text-text-muted text-lg max-w-xl mb-10"
       >
-        From 2026 into the future — every year gets its own theme, its own
-        story, its own way of showing progress. This is{" "}
+        A public roadmap connecting long-term goals, real projects, important
+        decisions, and the evidence behind each step. This is{" "}
         <span className="text-text-primary font-medium">Through The Time</span>.
       </motion.p>
 

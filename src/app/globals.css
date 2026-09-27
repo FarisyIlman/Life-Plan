@@ -7,6 +7,12 @@
   --color-border: #2a2e3f;
   --color-text-primary: #e8e9ed;
   --color-text-muted: #9497a6;
+  --color-status-success: #22c55e;
+  --color-status-warning: #facc15;
+  --color-status-danger: #dc2626;
+  --color-status-neutral: #9497a6;
+  --radius-card: 0.5rem;
+  --space-card: 1.25rem;
 
   /* Signature / CTA */
   --color-accent: #7c6fef;
@@ -32,6 +38,13 @@
   --color-tree-green: #166534;
   --color-tree-brown: #78350f;
   --color-tree-gold: #ca8a04;
+
+  /* Shared semantic theme tokens */
+  --color-theme-galaxy: var(--color-galaxy-cyan);
+  --color-theme-monthly: var(--color-monthly-blue);
+  --color-theme-racing: var(--color-racing-red);
+  --color-theme-voyage: var(--color-voyage-teal);
+  --color-theme-tree: var(--color-tree-green);
 
   /* Fonts */
   --font-heading: "Space Grotesk", sans-serif;

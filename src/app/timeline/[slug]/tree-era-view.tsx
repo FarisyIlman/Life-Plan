@@ -4,15 +4,18 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import type { Era, ContentBlock, AchievementGoal } from "@prisma/client";
 import AchievementTracker from "@/components/AchievementTracker";
+import EraReflection from "@/components/EraReflection";
 import CardThemeContent from "@/components/CardThemeContent";
+import {
+  getContentProgress,
+  getPublicContentBlocks,
+} from "@/lib/content-progress";
 
 type EraWithData = Era & {
   contentBlocks: ContentBlock[];
   achievementGoals: AchievementGoal[];
 };
 type EraNav = { slug: string; title: string } | null;
-
-const FOUNDING_PARTNERS = ["Farisy", "Umar", "Ucup"];
 
 export default function TreeEraView({
   era,
@@ -23,11 +26,17 @@ export default function TreeEraView({
   prevEra: EraNav;
   nextEra: EraNav;
 }) {
-  const total = era.contentBlocks.length;
-  const completed = era.contentBlocks.filter((b) => b.isCompleted).length;
-  const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
+  const { total, percentage: progress } = getContentProgress(era.contentBlocks);
+  const publicContentBlocks = getPublicContentBlocks(era.contentBlocks);
 
   const isBeyond = era.slug.toLowerCase().includes("beyond");
+  const founderName = era.founderName || "Farisy";
+  const holdingName = era.holdingName || "My Holding Company";
+  const operatingName = era.operatingName || "The Company";
+  const foundingPartners = (era.foundingPartners || "Farisy, Umar, Ucup")
+    .split(",")
+    .map((name) => name.trim())
+    .filter(Boolean);
 
   return (
     <div className="min-h-screen bg-bg-primary relative">
@@ -70,7 +79,14 @@ export default function TreeEraView({
               <span>{isBeyond ? "Building Progress" : "Rooted Progress"}</span>
               <span>{progress}%</span>
             </div>
-            <div className="h-2 bg-bg-secondary rounded-full overflow-hidden">
+            <div
+              className="h-2 bg-bg-secondary rounded-full overflow-hidden"
+              role="progressbar"
+              aria-label="Growth progress"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={progress}
+            >
               <div
                 className="h-full bg-tree-green transition-all duration-700"
                 style={{ width: `${progress}%` }}
@@ -79,6 +95,14 @@ export default function TreeEraView({
           </div>
         )}
       </section>
+
+      <EraReflection
+        thesis={era.thesis}
+        tradeOff={era.tradeOff}
+        successIndicators={era.successIndicators}
+        retrospective={era.retrospective}
+        accent="#D4A72C"
+      />
 
       {/* Beyond-only: ownership structure */}
       {isBeyond && (
@@ -91,21 +115,21 @@ export default function TreeEraView({
               <p className="text-tree-gold text-xs font-heading tracking-wide">
                 FOUNDER
               </p>
-              <p className="text-text-primary">Farisy</p>
+              <p className="text-text-primary">{founderName}</p>
             </div>
             <div className="w-px h-6 bg-border" />
             <div className="bg-bg-secondary border border-border rounded-lg px-6 py-3 text-center">
               <p className="text-text-muted text-xs font-heading tracking-wide">
                 HOLDING
               </p>
-              <p className="text-text-primary">My Holding Company</p>
+              <p className="text-text-primary">{holdingName}</p>
             </div>
             <div className="w-px h-6 bg-border" />
             <div className="bg-bg-secondary border border-tree-green rounded-lg px-6 py-3 text-center">
               <p className="text-tree-green text-xs font-heading tracking-wide">
                 OPERATING
               </p>
-              <p className="text-text-primary">The Company</p>
+              <p className="text-text-primary">{operatingName}</p>
             </div>
           </div>
 
@@ -114,7 +138,7 @@ export default function TreeEraView({
               FOUNDING PARTNERS
             </p>
             <div className="flex justify-center gap-3 flex-wrap">
-              {FOUNDING_PARTNERS.map((name) => (
+              {foundingPartners.map((name) => (
                 <span
                   key={name}
                   className="bg-bg-secondary border border-border rounded-full px-4 py-1.5 text-sm text-text-primary"
@@ -127,14 +151,41 @@ export default function TreeEraView({
         </section>
       )}
 
+      <section className="px-6 pb-12 max-w-4xl mx-auto" aria-label="Growth map">
+        <div className="flex items-center gap-3 mb-5">
+          <span className="h-3 w-3 rounded-full bg-tree-gold shadow-[0_0_12px_rgba(202,138,4,0.55)]" />
+          <div>
+            <p className="text-tree-gold text-xs font-heading tracking-widest uppercase">
+              Root to outcome
+            </p>
+            <p className="text-text-muted text-sm">
+              Each block is a branch in this era&apos;s growth system.
+            </p>
+          </div>
+        </div>
+        <div className="relative pl-6 border-l border-tree-green/60 space-y-3">
+          {publicContentBlocks.slice(0, 4).map((block, index) => (
+            <div key={block.id} className="relative flex items-center gap-3">
+              <span className="absolute -left-[31px] h-3 w-3 rounded-full border-2 border-tree-green bg-bg-primary" />
+              <span className="text-tree-green text-xs font-heading">
+                BRANCH {index + 1}
+              </span>
+              <span className="text-text-primary text-sm break-words">
+                {block.title}
+              </span>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <section className="px-6 pb-20 max-w-3xl mx-auto">
-        {total === 0 ? (
+        {publicContentBlocks.length === 0 ? (
           <p className="text-text-muted text-center">
             No content yet for this era.
           </p>
         ) : (
           <div className="space-y-4">
-            {era.contentBlocks.map((block) => (
+            {publicContentBlocks.map((block) => (
               <CardThemeContent key={block.id} block={block} theme="TREE" />
             ))}
           </div>
@@ -151,6 +202,7 @@ export default function TreeEraView({
                 key={year}
                 year={year}
                 goals={era.achievementGoals.filter((g) => g.year === year)}
+                theme="TREE"
               />
             ))}
         </section>

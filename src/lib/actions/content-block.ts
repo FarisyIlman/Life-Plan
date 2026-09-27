@@ -8,6 +8,10 @@ import { getPrismaErrorMessage } from "@/lib/prisma-error";
 
 function buildData(parsed: {
   description?: string;
+  why?: string;
+  nextAction?: string;
+  evidenceUrl?: string;
+  visibility?: "PUBLIC" | "SUMMARY" | "PRIVATE";
   techStack?: string;
   responsibilities?: string;
   month?: number;
@@ -17,6 +21,10 @@ function buildData(parsed: {
 }) {
   return {
     description: parsed.description || "",
+    why: parsed.why || "",
+    nextAction: parsed.nextAction || "",
+    evidenceUrl: parsed.evidenceUrl || "",
+    visibility: parsed.visibility || "PUBLIC",
     techStack: parsed.techStack || "",
     responsibilities: parsed.responsibilities || "",
     month: parsed.month || null,
@@ -42,11 +50,16 @@ export async function createContentBlock(formData: FormData) {
     type,
     title,
     subtitle,
+    achievementGoalId,
     deadline,
     order,
     isPublished,
     isCompleted,
     description,
+    why,
+    nextAction,
+    evidenceUrl,
+    visibility,
     techStack,
     responsibilities,
     month,
@@ -62,8 +75,13 @@ export async function createContentBlock(formData: FormData) {
         type,
         title,
         subtitle: subtitle || null,
+        achievementGoalId: achievementGoalId || null,
         data: buildData({
           description,
+          why,
+          nextAction,
+          evidenceUrl,
+          visibility,
           techStack,
           responsibilities,
           month,
@@ -101,11 +119,16 @@ export async function updateContentBlock(id: string, formData: FormData) {
     type,
     title,
     subtitle,
+    achievementGoalId,
     deadline,
     order,
     isPublished,
     isCompleted,
     description,
+    why,
+    nextAction,
+    evidenceUrl,
+    visibility,
     techStack,
     responsibilities,
     month,
@@ -122,8 +145,13 @@ export async function updateContentBlock(id: string, formData: FormData) {
         type,
         title,
         subtitle: subtitle || null,
+        achievementGoalId: achievementGoalId || null,
         data: buildData({
           description,
+          why,
+          nextAction,
+          evidenceUrl,
+          visibility,
           techStack,
           responsibilities,
           month,

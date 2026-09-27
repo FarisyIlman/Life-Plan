@@ -6,6 +6,10 @@ export interface ContentBlockPreview {
   isCompleted: boolean;
   data: {
     description?: string;
+    why?: string;
+    nextAction?: string;
+    evidenceUrl?: string;
+    visibility?: "PUBLIC" | "SUMMARY" | "PRIVATE";
     techStack?: string;
     responsibilities?: string;
     textColor?: string;
