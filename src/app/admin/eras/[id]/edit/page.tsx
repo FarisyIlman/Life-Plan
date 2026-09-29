@@ -18,8 +18,15 @@ export default async function EditEraPage({
   if (!era) notFound();
 
   return (
-    <main className="min-h-screen bg-bg-primary text-text-primary p-8">
-      <h1 className="font-heading text-3xl mb-6">Edit Era</h1>
+    <main className="admin-page">
+      <header className="admin-page-header">
+        <div>
+          <h1 className="admin-page-title">Edit era</h1>
+          <p className="admin-page-description">
+            Update this chapter while keeping its published content intact.
+          </p>
+        </div>
+      </header>
       <EditEraForm era={era} />
     </main>
   );

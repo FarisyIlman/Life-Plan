@@ -3,6 +3,7 @@ import HeroSection from "@/components/HeroSection";
 import IntroSection from "@/components/IntroSection";
 import TimelinePreview from "@/components/TimelinePreview";
 import Footer from "@/components/Footer";
+import { getSiteUrl } from "@/lib/site-url";
 
 export default function Home() {
   const jsonLd = {
@@ -10,7 +11,7 @@ export default function Home() {
     "@type": "Person",
     name: "Farisy Syarif",
     alternateName: ["xEmrys", "Edward", "mdtamla"],
-    url: process.env.AUTH_URL || "http://localhost:3000",
+    url: getSiteUrl().origin,
     sameAs: ["https://github.com/FarisyIlman"],
     jobTitle: "Student & Software Developer",
   };

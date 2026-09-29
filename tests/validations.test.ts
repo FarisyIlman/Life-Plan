@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { eraSchema } from "../src/lib/validations/era";
+import { achievementGoalSchema } from "../src/lib/validations/achievement-goal";
 import { contentBlockSchema } from "../src/lib/validations/content-block";
+import { getPublicAchievementGoals } from "../src/lib/achievement-visibility";
+import { getDeadlineNotificationType } from "../src/lib/notification-rules";
 import {
   getContentProgress,
   getPublicContentBlocks,
@@ -39,6 +42,129 @@ test("era validation rejects an end year before the start year", () => {
   const result = eraSchema.safeParse({ ...baseEra, endYear: "2025" });
 
   assert.equal(result.success, false);
+});
+
+test("Beyond page variant is restricted to Tree eras", () => {
+  assert.equal(
+    eraSchema.safeParse({ ...baseEra, theme: "TREE", pageVariant: "BEYOND" })
+      .success,
+    true,
+  );
+  assert.equal(
+    eraSchema.safeParse({ ...baseEra, pageVariant: "BEYOND" }).success,
+    false,
+  );
+});
+
+test("achievement visibility defaults to private with public details disabled", () => {
+  const result = achievementGoalSchema.safeParse({
+    eraId: "era-1",
+    year: "2028",
+    category: "SAVING",
+    targetMin: "2000000",
+    targetIdeal: "3000000",
+  });
+
+  assert.equal(result.success, true);
+  if (result.success) {
+    assert.equal(result.data.visibility, "PRIVATE");
+    assert.equal(result.data.showValues, false);
+    assert.equal(result.data.showEvidence, false);
+  }
+});
+
+test("public achievement serialization removes unapproved values and evidence", () => {
+  const goals = [
+    {
+      visibility: "PRIVATE" as const,
+      showValues: true,
+      showEvidence: true,
+      targetMin: 2_000_000,
+      targetIdeal: 3_000_000,
+      actualValue: 2_500_000,
+      imageUrl: "https://res.cloudinary.com/demo/image/upload/proof.png",
+      note: "Private note",
+    },
+    {
+      visibility: "SUMMARY" as const,
+      showValues: true,
+      showEvidence: true,
+      targetMin: 2_000_000,
+      targetIdeal: 3_000_000,
+      actualValue: 2_500_000,
+      imageUrl: "https://res.cloudinary.com/demo/image/upload/proof.png",
+      note: "Summary note",
+    },
+    {
+      visibility: "PUBLIC" as const,
+      showValues: false,
+      showEvidence: true,
+      targetMin: 2_000_000,
+      targetIdeal: 3_000_000,
+      actualValue: 2_500_000,
+      imageUrl: "https://res.cloudinary.com/demo/image/upload/proof.png",
+      note: "Public note",
+    },
+    {
+      visibility: "PUBLIC" as const,
+      showValues: true,
+      showEvidence: false,
+      targetMin: 2_000_000,
+      targetIdeal: 3_000_000,
+      actualValue: 2_500_000,
+      imageUrl: "https://res.cloudinary.com/demo/image/upload/hidden.png",
+      note: null,
+    },
+  ];
+  const result = getPublicAchievementGoals(goals);
+
+  assert.equal(result.length, 3);
+  assert.equal(result[0].targetMin, 0);
+  assert.equal(result[0].actualValue, null);
+  assert.equal(result[0].imageUrl, null);
+  assert.equal(result[0].note, null);
+  assert.equal(result[1].targetIdeal, 0);
+  assert.equal(result[1].actualValue, null);
+  assert.equal(result[1].imageUrl, goals[2].imageUrl);
+  assert.equal(result[2].targetMin, goals[3].targetMin);
+  assert.equal(result[2].actualValue, goals[3].actualValue);
+  assert.equal(result[2].imageUrl, null);
+});
+
+test("achievement evidence URLs must use Cloudinary HTTPS image URLs", () => {
+  const baseGoal = {
+    eraId: "era-1",
+    year: "2028",
+    category: "SAVING",
+    targetMin: "2000000",
+    targetIdeal: "3000000",
+  };
+
+  assert.equal(
+    achievementGoalSchema.safeParse({
+      ...baseGoal,
+      imageUrl: "https://res.cloudinary.com/demo/image/upload/proof.png",
+    }).success,
+    true,
+  );
+  assert.equal(
+    achievementGoalSchema.safeParse({
+      ...baseGoal,
+      imageUrl: "https://example.com/proof.png",
+    }).success,
+    false,
+  );
+});
+
+test("deadline notifications classify 1, 3, and 7 day windows", () => {
+  const now = new Date("2026-09-27T00:00:00Z");
+  const after = (days: number) => new Date(now.getTime() + days * 86_400_000);
+
+  assert.equal(getDeadlineNotificationType(after(1), now), "DEADLINE_1D");
+  assert.equal(getDeadlineNotificationType(after(3), now), "DEADLINE_3D");
+  assert.equal(getDeadlineNotificationType(after(7), now), "DEADLINE_7D");
+  assert.equal(getDeadlineNotificationType(after(8), now), null);
+  assert.equal(getDeadlineNotificationType(after(-1), now), null);
 });
 
 test("content block validation rejects invalid deadlines", () => {

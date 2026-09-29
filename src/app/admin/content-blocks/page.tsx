@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { auth } from "@/../auth";
 import { redirect } from "next/navigation";
+import { Plus, Search, X } from "lucide-react";
 import ContentBlockList from "./content-block-list";
 
 const THEMES = ["GALAXY", "MONTHLY", "RACING", "VOYAGE", "TREE"] as const;
@@ -68,214 +69,206 @@ export default async function ContentBlocksPage({
     if (block.isCompleted) entry.completed++;
   }
 
-  const buildQuery = (overrides: Record<string, string | undefined>) => {
-    const params = new URLSearchParams();
-    const merged = { filter, q, eraId, theme, published, ...overrides };
-    Object.entries(merged).forEach(([key, value]) => {
-      if (value) params.set(key, value);
-    });
-    const qs = params.toString();
-    return qs ? `/admin/content-blocks?${qs}` : "/admin/content-blocks";
-  };
-
   const hasActiveFilters = !!(filter || q || eraId || theme || published);
 
   return (
-    <main className="min-h-screen bg-bg-primary text-text-primary p-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="font-heading text-3xl">Content Blocks</h1>
+    <main className="admin-page">
+      <header className="admin-page-header">
+        <div>
+          <h1 className="admin-page-title">Content blocks</h1>
+          <p className="admin-page-description">
+            Find, edit, and publish milestones across your timeline.
+          </p>
+        </div>
         <Link
           href="/admin/content-blocks/new"
-          className="bg-accent text-white px-4 py-2 rounded font-heading hover:opacity-90"
+          className="inline-flex min-h-10 items-center gap-2 rounded-md bg-accent px-4 text-sm font-medium text-white transition hover:brightness-110"
         >
-          + New Content Block
+          <Plus size={16} aria-hidden="true" />
+          New content block
         </Link>
-      </div>
+      </header>
 
-      {/* Progress per era */}
       {progressByEra.size > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          {Array.from(progressByEra.values()).map((entry) => {
-            const pct =
-              entry.total > 0
-                ? Math.round((entry.completed / entry.total) * 100)
-                : 0;
-            return (
-              <div
-                key={entry.title}
-                className="bg-bg-secondary border border-border rounded-lg p-4"
-              >
-                <p className="text-text-primary text-sm mb-2">{entry.title}</p>
-                <div className="h-1.5 bg-bg-primary rounded-full overflow-hidden mb-1">
+        <section className="mb-6" aria-label="Progress by era">
+          <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-muted">
+            Progress by era
+          </h2>
+          <div className="admin-panel divide-y divide-border overflow-hidden">
+            {Array.from(progressByEra.values()).map((entry) => {
+              const pct =
+                entry.total > 0
+                  ? Math.round((entry.completed / entry.total) * 100)
+                  : 0;
+              return (
+                <div
+                  key={entry.title}
+                  className="grid grid-cols-1 items-center gap-2 px-4 py-3 sm:grid-cols-[minmax(10rem,0.8fr)_minmax(12rem,2fr)_auto] sm:gap-5"
+                >
+                  <p className="truncate text-sm font-medium text-text-primary">
+                    {entry.title}
+                  </p>
                   <div
-                    className="h-full bg-accent transition-all duration-500"
-                    style={{ width: `${pct}%` }}
-                  />
+                    className="h-1.5 overflow-hidden rounded-full bg-bg-primary"
+                    role="progressbar"
+                    aria-label={`${entry.title} completion`}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={pct}
+                  >
+                    <div
+                      className="h-full rounded-full bg-accent transition-all duration-500"
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                  <p className="text-xs text-text-muted sm:text-right">
+                    {entry.completed}/{entry.total} complete · {pct}%
+                  </p>
                 </div>
-                <p className="text-text-muted text-xs">
-                  {entry.completed}/{entry.total} completed ({pct}%)
-                </p>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        </section>
       )}
 
-      {/* Search bar */}
-      <form action="/admin/content-blocks" method="get" className="mb-4">
-        {eraId && <input type="hidden" name="eraId" value={eraId} />}
-        {theme && <input type="hidden" name="theme" value={theme} />}
-        {published && (
-          <input type="hidden" name="published" value={published} />
-        )}
-        {filter && <input type="hidden" name="filter" value={filter} />}
-        <input
-          type="text"
-          name="q"
-          defaultValue={q || ""}
-          placeholder="Search by title..."
-          className="w-full max-w-md p-2 rounded bg-bg-secondary border border-border text-text-primary"
-        />
+      <form
+        action="/admin/content-blocks"
+        method="get"
+        className="admin-panel mb-6 grid grid-cols-1 items-end gap-3 p-4 sm:grid-cols-2 xl:grid-cols-[minmax(14rem,1.5fr)_repeat(4,minmax(9rem,1fr))_auto]"
+      >
+        <div>
+          <label
+            htmlFor="content-search"
+            className="mb-1.5 block text-xs font-medium text-text-muted"
+          >
+            Search
+          </label>
+          <input
+            id="content-search"
+            type="search"
+            name="q"
+            defaultValue={q || ""}
+            placeholder="Search titles"
+            className="min-h-10 w-full rounded-md border border-border bg-bg-primary px-3 text-sm text-text-primary placeholder:text-text-muted"
+          />
+        </div>
+        <div>
+          <label
+            htmlFor="filter-era"
+            className="mb-1.5 block text-xs font-medium text-text-muted"
+          >
+            Era
+          </label>
+          <select
+            id="filter-era"
+            name="eraId"
+            defaultValue={eraId || ""}
+            className="min-h-10 w-full rounded-md border border-border bg-bg-primary px-3 text-sm text-text-primary"
+          >
+            <option value="">All eras</option>
+            {eras.map((era) => (
+              <option key={era.id} value={era.id}>
+                {era.title}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label
+            htmlFor="filter-theme"
+            className="mb-1.5 block text-xs font-medium text-text-muted"
+          >
+            Theme
+          </label>
+          <select
+            id="filter-theme"
+            name="theme"
+            defaultValue={theme || ""}
+            className="min-h-10 w-full rounded-md border border-border bg-bg-primary px-3 text-sm text-text-primary"
+          >
+            <option value="">All themes</option>
+            {THEMES.map((value) => (
+              <option key={value} value={value}>
+                {value}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label
+            htmlFor="filter-published"
+            className="mb-1.5 block text-xs font-medium text-text-muted"
+          >
+            Publication
+          </label>
+          <select
+            id="filter-published"
+            name="published"
+            defaultValue={published || ""}
+            className="min-h-10 w-full rounded-md border border-border bg-bg-primary px-3 text-sm text-text-primary"
+          >
+            <option value="">All content</option>
+            <option value="true">Published</option>
+            <option value="false">Draft</option>
+          </select>
+        </div>
+        <div>
+          <label
+            htmlFor="filter-completion"
+            className="mb-1.5 block text-xs font-medium text-text-muted"
+          >
+            Completion
+          </label>
+          <select
+            id="filter-completion"
+            name="filter"
+            defaultValue={filter || ""}
+            className="min-h-10 w-full rounded-md border border-border bg-bg-primary px-3 text-sm text-text-primary"
+          >
+            <option value="">All statuses</option>
+            <option value="pending">Pending</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="submit"
+            className="inline-flex min-h-10 flex-1 items-center justify-center gap-2 rounded-md bg-accent px-3 text-sm font-medium text-white transition hover:brightness-110"
+          >
+            <Search size={15} aria-hidden="true" />
+            Apply
+          </button>
+          {hasActiveFilters && (
+            <Link
+              href="/admin/content-blocks"
+              aria-label="Clear all filters"
+              title="Clear all filters"
+              className="inline-flex size-10 shrink-0 items-center justify-center rounded-md border border-border text-text-muted transition hover:bg-admin-raised hover:text-text-primary"
+            >
+              <X size={16} aria-hidden="true" />
+            </Link>
+          )}
+        </div>
       </form>
 
-      {/* Filter dropdowns */}
-      <div className="flex gap-3 mb-4 flex-wrap items-center">
-        <div className="flex gap-1 flex-wrap">
-          <Link
-            href={buildQuery({ eraId: undefined })}
-            className={`px-3 py-1.5 rounded text-xs ${
-              !eraId
-                ? "bg-accent text-white"
-                : "bg-bg-secondary text-text-muted hover:text-text-primary"
-            }`}
-          >
-            All Eras
-          </Link>
-          {eras.map((era) => (
-            <Link
-              key={era.id}
-              href={buildQuery({ eraId: era.id })}
-              className={`px-3 py-1.5 rounded text-xs ${
-                eraId === era.id
-                  ? "bg-accent text-white"
-                  : "bg-bg-secondary text-text-muted hover:text-text-primary"
-              }`}
-            >
-              {era.title}
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      <div className="flex gap-3 mb-4 flex-wrap">
-        <div className="flex gap-1 flex-wrap">
-          <Link
-            href={buildQuery({ theme: undefined })}
-            className={`px-3 py-1.5 rounded text-xs ${
-              !theme
-                ? "bg-accent text-white"
-                : "bg-bg-secondary text-text-muted hover:text-text-primary"
-            }`}
-          >
-            All Themes
-          </Link>
-          {THEMES.map((t) => (
-            <Link
-              key={t}
-              href={buildQuery({ theme: t })}
-              className={`px-3 py-1.5 rounded text-xs ${
-                theme === t
-                  ? "bg-accent text-white"
-                  : "bg-bg-secondary text-text-muted hover:text-text-primary"
-              }`}
-            >
-              {t}
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      <div className="flex gap-3 mb-6 flex-wrap">
-        <div className="flex gap-1">
-          <Link
-            href={buildQuery({ published: undefined })}
-            className={`px-3 py-1.5 rounded text-xs ${
-              !published
-                ? "bg-accent text-white"
-                : "bg-bg-secondary text-text-muted hover:text-text-primary"
-            }`}
-          >
-            All
-          </Link>
-          <Link
-            href={buildQuery({ published: "true" })}
-            className={`px-3 py-1.5 rounded text-xs ${
-              published === "true"
-                ? "bg-accent text-white"
-                : "bg-bg-secondary text-text-muted hover:text-text-primary"
-            }`}
-          >
-            Published
-          </Link>
-          <Link
-            href={buildQuery({ published: "false" })}
-            className={`px-3 py-1.5 rounded text-xs ${
-              published === "false"
-                ? "bg-accent text-white"
-                : "bg-bg-secondary text-text-muted hover:text-text-primary"
-            }`}
-          >
-            Draft
-          </Link>
-        </div>
-
-        <div className="flex gap-1">
-          <Link
-            href={buildQuery({ filter: undefined })}
-            className={`px-3 py-1.5 rounded text-xs ${
-              !filter
-                ? "bg-accent text-white"
-                : "bg-bg-secondary text-text-muted hover:text-text-primary"
-            }`}
-          >
-            All Status
-          </Link>
-          <Link
-            href={buildQuery({ filter: "pending" })}
-            className={`px-3 py-1.5 rounded text-xs ${
-              filter === "pending"
-                ? "bg-accent text-white"
-                : "bg-bg-secondary text-text-muted hover:text-text-primary"
-            }`}
-          >
-            Pending
-          </Link>
-          <Link
-            href={buildQuery({ filter: "completed" })}
-            className={`px-3 py-1.5 rounded text-xs ${
-              filter === "completed"
-                ? "bg-accent text-white"
-                : "bg-bg-secondary text-text-muted hover:text-text-primary"
-            }`}
-          >
-            Completed
-          </Link>
-        </div>
-
-        {hasActiveFilters && (
-          <Link
-            href="/admin/content-blocks"
-            className="px-3 py-1.5 rounded text-xs text-red-400 hover:underline"
-          >
-            Clear all filters
-          </Link>
-        )}
-      </div>
-
       {blocks.length === 0 ? (
-        <p className="text-text-muted mt-8">
-          No content blocks match your filters.
-        </p>
+        <div className="admin-panel px-5 py-10 text-center">
+          <p className="text-sm font-medium text-text-primary">
+            No content blocks match these filters.
+          </p>
+          <p className="mt-1 text-xs text-text-muted">
+            Adjust the search or filter values and try again.
+          </p>
+          {hasActiveFilters && (
+            <Link
+              href="/admin/content-blocks"
+              className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-md border border-border px-3 text-sm text-text-primary hover:bg-admin-raised"
+            >
+              <X size={15} aria-hidden="true" />
+              Clear filters
+            </Link>
+          )}
+        </div>
       ) : (
         <ContentBlockList blocks={blocks} draggable={!hasActiveFilters} />
       )}

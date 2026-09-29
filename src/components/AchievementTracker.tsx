@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import type { AchievementGoal } from "@prisma/client";
 import { THEME_CONFIG, type ThemeKey } from "@/lib/theme-config";
 
@@ -93,37 +94,53 @@ export default function AchievementTracker({
           </span>
         </div>
 
-        <div className="text-sm text-text-muted mb-3">
-          <p>Min: {formatValue(goal.targetMin, goal.category)}</p>
-          <p>Ideal: {formatValue(goal.targetIdeal, goal.category)}</p>
-          {goal.actualValue != null && (
-            <p className="text-text-primary mt-1">
-              Actual: {formatValue(goal.actualValue, goal.category)}
-            </p>
-          )}
-        </div>
-
-        {goal.actualValue != null && (
-          <div
-            className="h-2 bg-bg-primary rounded-full overflow-hidden"
-            role="progressbar"
-            aria-label={`${label} progress`}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={progress}
-          >
-            <div
-              className="h-full transition-all duration-700"
-              style={{
-                width: `${progress}%`,
-                backgroundColor: themeConfig.accentVar,
-              }}
-            />
+        {goal.visibility === "PUBLIC" && goal.showValues && (
+          <div className="text-sm text-text-muted mb-3">
+            <p>Min: {formatValue(goal.targetMin, goal.category)}</p>
+            <p>Ideal: {formatValue(goal.targetIdeal, goal.category)}</p>
+            {goal.actualValue != null && (
+              <p className="text-text-primary mt-1">
+                Actual: {formatValue(goal.actualValue, goal.category)}
+              </p>
+            )}
           </div>
         )}
 
-        {goal.note && (
+        {goal.visibility === "PUBLIC" &&
+          goal.showValues &&
+          goal.actualValue != null && (
+            <div
+              className="h-2 bg-bg-primary rounded-full overflow-hidden"
+              role="progressbar"
+              aria-label={`${label} progress`}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={progress}
+            >
+              <div
+                className="h-full transition-all duration-700"
+                style={{
+                  width: `${progress}%`,
+                  backgroundColor: themeConfig.accentVar,
+                }}
+              />
+            </div>
+          )}
+
+        {goal.visibility === "PUBLIC" && goal.note && (
           <p className="text-text-muted text-xs mt-3 italic">{goal.note}</p>
+        )}
+
+        {goal.visibility === "PUBLIC" && goal.showEvidence && goal.imageUrl && (
+          <div className="relative mt-4 aspect-video overflow-hidden rounded border border-border">
+            <Image
+              src={goal.imageUrl}
+              alt={`${label} evidence`}
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-contain"
+            />
+          </div>
         )}
       </motion.div>
     );

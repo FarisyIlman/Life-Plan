@@ -2,14 +2,19 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { ArrowUpRight, CalendarDays, Check } from "lucide-react";
 import type { ContentBlock } from "@prisma/client";
 import type { ContentBlockPreview } from "@/lib/types";
 import MarkdownContent from "@/components/MarkdownContent";
 
 export default function CardGalaxyTheme({
   block,
+  sequence,
+  reduceMotion = false,
 }: {
   block: ContentBlock | ContentBlockPreview;
+  sequence?: number;
+  reduceMotion?: boolean;
 }) {
   const data = block.data as {
     description?: string;
@@ -31,33 +36,46 @@ export default function CardGalaxyTheme({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
+      initial={reduceMotion ? false : { opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-100px" }}
-      transition={{ duration: 0.6 }}
-      className="group relative bg-bg-secondary/80 border border-galaxy-purple/40 rounded-lg p-5 overflow-hidden shadow-[0_0_28px_rgba(109,40,217,0.08)] transition-colors hover:border-galaxy-cyan/70"
+      transition={{ duration: reduceMotion ? 0 : 0.45 }}
+      className="galaxy-mission-card group relative min-w-0 p-5 sm:p-6"
     >
-      <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-galaxy-purple opacity-20 blur-2xl" />
-      <div className="absolute top-5 right-5 h-2 w-2 rounded-full bg-galaxy-cyan shadow-[0_0_12px_rgba(34,211,238,0.9)] transition-transform group-hover:scale-150" />
-
-      {block.deadline && (
-        <p className="text-galaxy-gold text-xs mb-2 font-heading tracking-wide uppercase">
-          Deadline: {new Date(block.deadline).toLocaleDateString("en-GB")}
-        </p>
-      )}
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <span className="inline-flex items-center gap-2 text-xs font-medium uppercase text-galaxy-purple">
+          <span className="h-px w-5 bg-galaxy-purple/70" />
+          {sequence
+            ? `Mission signal ${String(sequence).padStart(2, "0")}`
+            : "Mission signal"}
+        </span>
+        {block.isCompleted ? (
+          <span className="inline-flex min-h-7 items-center gap-1.5 rounded-full border border-status-success/25 bg-status-success/8 px-2.5 text-xs font-medium text-status-success">
+            <Check size={13} aria-hidden="true" />
+            Complete
+          </span>
+        ) : block.deadline ? (
+          <span className="inline-flex min-h-7 items-center gap-1.5 rounded-full border border-galaxy-gold/25 bg-galaxy-gold/8 px-2.5 text-xs font-medium text-galaxy-gold">
+            <CalendarDays size={13} aria-hidden="true" />
+            {new Date(block.deadline).toLocaleDateString("en-GB")}
+          </span>
+        ) : null}
+      </div>
 
       <h3
-        className="font-galaxy text-xl mb-1"
+        className="mb-2 wrap-break-word font-heading text-xl font-semibold leading-snug text-text-primary sm:text-2xl"
         style={{ color: data.textColor || undefined }}
       >
         {block.title}
       </h3>
       {block.subtitle && (
-        <p className="text-text-muted text-sm mb-4">{block.subtitle}</p>
+        <p className="mb-4 text-sm leading-6 text-text-muted">
+          {block.subtitle}
+        </p>
       )}
 
       {data.imageUrl && !isPrivate && !isSummary && (
-        <figure className="mb-4 overflow-hidden rounded border border-galaxy-purple/30">
+        <figure className="mb-5 overflow-hidden rounded-lg border border-white/10 bg-black/20">
           <Image
             src={data.imageUrl}
             alt={data.imageCaption || block.title}
@@ -76,7 +94,7 @@ export default function CardGalaxyTheme({
 
       {data.description && (
         <div
-          className="text-text-primary text-sm mb-4"
+          className="mb-5 text-sm leading-7 text-text-primary"
           style={{ color: data.textColor || undefined }}
         >
           <MarkdownContent content={data.description} />
@@ -84,44 +102,56 @@ export default function CardGalaxyTheme({
       )}
 
       {data.why && (
-        <p className="text-text-muted text-sm mb-3">
-          <span className="text-galaxy-gold font-heading">WHY IT MATTERS</span>
-          <br />
-          {data.why}
-        </p>
+        <div className="mb-5 border-l-2 border-galaxy-gold/60 pl-3">
+          <p className="mb-1 text-[11px] font-semibold uppercase text-galaxy-gold">
+            Why it matters
+          </p>
+          <p className="text-sm leading-6 text-text-muted">{data.why}</p>
+        </div>
       )}
 
       {data.linkedGoal && (
-        <p className="text-text-muted text-xs mb-3">
-          <span className="text-galaxy-gold font-heading">SUPPORTS GOAL</span>{" "}
+        <p className="mb-4 text-xs text-text-muted">
+          <span className="font-medium text-galaxy-purple">Supports goal</span>
+          <span aria-hidden="true"> · </span>
           {data.linkedGoal.year} {data.linkedGoal.category.replaceAll("_", " ")}
         </p>
       )}
 
-      {data.techStack && !isPrivate && !isSummary && (
-        <div className="mb-3">
-          <p className="text-galaxy-cyan text-xs font-heading mb-1">
-            TECH STACK
-          </p>
-          <p className="text-text-muted text-sm">{data.techStack}</p>
-        </div>
-      )}
-
-      {data.responsibilities && !isPrivate && !isSummary && (
-        <div>
-          <p className="text-galaxy-cyan text-xs font-heading mb-1">
-            RESPONSIBILITIES
-          </p>
-          <p className="text-text-muted text-sm">{data.responsibilities}</p>
-        </div>
-      )}
+      {(data.techStack || data.responsibilities) &&
+        !isPrivate &&
+        !isSummary && (
+          <dl className="grid grid-cols-1 gap-4 border-t border-white/8 pt-4 sm:grid-cols-2">
+            {data.techStack && (
+              <div>
+                <dt className="mb-1 text-[11px] font-semibold uppercase text-galaxy-cyan">
+                  Tech stack
+                </dt>
+                <dd className="text-sm leading-6 text-text-muted">
+                  {data.techStack}
+                </dd>
+              </div>
+            )}
+            {data.responsibilities && (
+              <div>
+                <dt className="mb-1 text-[11px] font-semibold uppercase text-galaxy-cyan">
+                  Responsibilities
+                </dt>
+                <dd className="text-sm leading-6 text-text-muted">
+                  {data.responsibilities}
+                </dd>
+              </div>
+            )}
+          </dl>
+        )}
 
       {data.nextAction && !isPrivate && !isSummary && (
-        <p className="text-text-muted text-sm mt-3">
-          <span className="text-galaxy-cyan font-heading">NEXT ACTION</span>
-          <br />
-          {data.nextAction}
-        </p>
+        <div className="mt-5 border-t border-white/8 pt-4">
+          <p className="mb-1 text-[11px] font-semibold uppercase text-galaxy-cyan">
+            Next action
+          </p>
+          <p className="text-sm leading-6 text-text-muted">{data.nextAction}</p>
+        </div>
       )}
 
       {data.evidenceUrl && !isPrivate && !isSummary && (
@@ -129,16 +159,10 @@ export default function CardGalaxyTheme({
           href={data.evidenceUrl}
           target="_blank"
           rel="noreferrer"
-          className="inline-block mt-4 text-galaxy-cyan text-xs font-heading hover:underline"
+          className="mt-4 inline-flex min-h-10 items-center gap-1.5 text-sm font-medium text-galaxy-cyan hover:underline"
         >
-          View evidence ↗
+          View evidence <ArrowUpRight size={15} aria-hidden="true" />
         </a>
-      )}
-
-      {block.isCompleted && (
-        <span className="inline-flex items-center gap-1 mt-4 text-green-400 text-xs font-heading">
-          <span aria-hidden="true">✓</span> Signal complete
-        </span>
       )}
     </motion.div>
   );

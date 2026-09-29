@@ -26,7 +26,7 @@ export default function NewAdminForm() {
   };
 
   return (
-    <form action={handleSubmit} className="max-w-lg space-y-4">
+    <form action={handleSubmit} className="admin-form admin-panel">
       {errors._form && (
         <p className="text-red-400 text-sm bg-red-400/10 border border-red-400/30 rounded p-3">
           {errors._form[0]}

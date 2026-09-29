@@ -33,6 +33,7 @@ model Era {
   slug        String   @unique
   title       String
   theme       ThemeType
+  pageVariant EraPageVariant @default(STANDARD)
   startYear   Int
   endYear     Int
   description String?  @db.Text
@@ -62,6 +63,11 @@ enum ThemeType {
   RACING
   VOYAGE
   TREE
+}
+
+enum EraPageVariant {
+  STANDARD
+  BEYOND
 }
 
 // ============================================
@@ -117,6 +123,9 @@ model AchievementGoal {
 
   status          AchievementStatus  @default(PENDING)
   imageUrl        String?
+  visibility      AchievementVisibility @default(PRIVATE)
+  showValues      Boolean            @default(false)
+  showEvidence    Boolean            @default(false)
 
   note            String?  @db.Text
   createdAt       DateTime @default(now())
@@ -141,6 +150,12 @@ enum AchievementStatus {
   UNDER_ACHIEVED
   ACHIEVED
   OVER_ACHIEVED
+}
+
+enum AchievementVisibility {
+  PRIVATE
+  SUMMARY
+  PUBLIC
 }
 
 // ============================================

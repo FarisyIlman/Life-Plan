@@ -14,8 +14,15 @@ export default async function NewAchievementPage() {
   });
 
   return (
-    <main className="min-h-screen bg-bg-primary text-text-primary p-8">
-      <h1 className="font-heading text-3xl mb-6">New Achievement Goal</h1>
+    <main className="admin-page">
+      <header className="admin-page-header">
+        <div>
+          <h1 className="admin-page-title">Create achievement goal</h1>
+          <p className="admin-page-description">
+            Set a target and choose exactly what can appear publicly.
+          </p>
+        </div>
+      </header>
       <NewAchievementForm eras={eras} />
     </main>
   );

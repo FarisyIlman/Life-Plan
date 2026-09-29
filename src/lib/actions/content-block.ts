@@ -13,7 +13,7 @@ import { logActivity } from "@/lib/activity-log";
 import {
   createCompletionNotification,
   createCompletionNotifications,
-} from "@/lib/actions/notification";
+} from "@/lib/notifications";
 
 function buildData(parsed: {
   description?: string;

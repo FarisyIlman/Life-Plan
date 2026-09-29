@@ -7,8 +7,15 @@ export default async function NewEraPage() {
   if (!session?.user) redirect("/admin/login");
 
   return (
-    <main className="min-h-screen bg-bg-primary text-text-primary p-8">
-      <h1 className="font-heading text-3xl mb-6">New Era</h1>
+    <main className="admin-page">
+      <header className="admin-page-header">
+        <div>
+          <h1 className="admin-page-title">Create era</h1>
+          <p className="admin-page-description">
+            Define the chapter theme, year range, and publication details.
+          </p>
+        </div>
+      </header>
       <NewEraForm />
     </main>
   );

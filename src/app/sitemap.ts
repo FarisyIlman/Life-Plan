@@ -1,8 +1,9 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
+import { getSiteUrl } from "@/lib/site-url";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.AUTH_URL || "http://localhost:3000";
+  const baseUrl = getSiteUrl().origin;
 
   const eras = await prisma.era.findMany({
     where: { isPublished: true, deletedAt: null },

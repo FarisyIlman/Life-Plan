@@ -12,6 +12,7 @@ export const eraSchema = z
       ),
     title: z.string().min(1, "Title is required"),
     theme: z.enum(["GALAXY", "MONTHLY", "RACING", "VOYAGE", "TREE"]),
+    pageVariant: z.enum(["STANDARD", "BEYOND"]).default("STANDARD"),
     startYear: z.coerce.number().int().min(2020).max(2100),
     endYear: z.coerce.number().int().min(2020).max(2100),
     description: z.string().optional(),
@@ -29,6 +30,10 @@ export const eraSchema = z
   .refine((data) => data.endYear >= data.startYear, {
     message: "End year must be greater than or equal to start year",
     path: ["endYear"],
+  })
+  .refine((data) => data.pageVariant !== "BEYOND" || data.theme === "TREE", {
+    message: "The Beyond page variant is only available for the Tree theme",
+    path: ["pageVariant"],
   });
 
 export type EraInput = z.infer<typeof eraSchema>;

@@ -11,6 +11,16 @@
   --color-status-warning: #facc15;
   --color-status-danger: #dc2626;
   --color-status-neutral: #9497a6;
+  --color-admin-canvas: #15171c;
+  --color-admin-sidebar: #191c21;
+  --color-admin-surface: #202329;
+  --color-admin-raised: #292d35;
+  --color-admin-border: #373c46;
+  --color-admin-text: #e8eaed;
+  --color-admin-muted: #a2a7b0;
+  --color-admin-accent: #a69cef;
+  --color-admin-active: #292638;
+  --color-admin-danger: #c97076;
   --radius-card: 0.5rem;
   --space-card: 1.25rem;
 
@@ -53,6 +63,253 @@
   --font-racing: "Rajdhani", sans-serif;
   --font-voyage: "Cinzel", serif;
 }
+
+.admin-theme {
+  --color-bg-primary: #17191e;
+  --color-bg-secondary: #202329;
+  --color-border: #373c46;
+  --color-text-primary: #e8eaed;
+  --color-text-muted: #a2a7b0;
+  --color-accent: #a69cef;
+  --color-status-success: #69bd98;
+  --color-status-warning: #d7b96d;
+  --color-status-danger: #cf7a7e;
+  --color-status-neutral: #a2a7b0;
+  --color-galaxy-gold: #d7b96d;
+  color-scheme: dark;
+}
+
+.galaxy-page {
+  --color-galaxy-cyan: #83cfdf;
+  --color-galaxy-purple: #b39be5;
+  --color-galaxy-gold: #d6b76b;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      ellipse 58rem 34rem at 78% 0%,
+      rgb(105 74 155 / 14%),
+      transparent 78%
+    ),
+    linear-gradient(180deg, #151620 0%, var(--color-bg-primary) 38rem);
+}
+
+.galaxy-page::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  opacity: 0.28;
+  background-image:
+    radial-gradient(
+      1px 1px at 24px 38px,
+      rgb(225 230 255 / 78%),
+      transparent 1.5px
+    ),
+    radial-gradient(
+      1px 1px at 116px 94px,
+      rgb(131 207 223 / 72%),
+      transparent 1.5px
+    ),
+    radial-gradient(
+      1px 1px at 188px 24px,
+      rgb(225 230 255 / 56%),
+      transparent 1.5px
+    ),
+    radial-gradient(
+      1px 1px at 78px 166px,
+      rgb(179 155 229 / 62%),
+      transparent 1.5px
+    );
+  background-size: 224px 204px;
+  mask-image: linear-gradient(to bottom, black, transparent 88%);
+}
+
+.galaxy-hero {
+  position: relative;
+  padding: 4rem 1.5rem 3rem;
+  border-bottom: 1px solid rgb(207 213 233 / 9%);
+}
+
+.galaxy-overview {
+  border-bottom: 1px solid rgb(207 213 233 / 9%);
+  background: rgb(19 21 31 / 45%);
+}
+
+.galaxy-mission-card {
+  border: 1px solid rgb(179 155 229 / 20%);
+  border-radius: 0.75rem;
+  background: linear-gradient(145deg, rgb(31 32 47 / 94%), rgb(24 26 37 / 96%));
+  box-shadow: 0 12px 32px rgb(0 0 0 / 16%);
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    transform 180ms ease;
+}
+
+.galaxy-mission-card:hover {
+  border-color: rgb(131 207 223 / 42%);
+  transform: translateY(-2px);
+}
+
+@media (min-width: 768px) {
+  .galaxy-hero {
+    padding: 5rem 2rem 3.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .galaxy-mission-card,
+  .galaxy-mission-card:hover {
+    transform: none;
+    transition: none;
+  }
+}
+
+.admin-page {
+  min-height: 100vh;
+  padding: 1.5rem;
+}
+
+.admin-page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+  flex-wrap: wrap;
+}
+
+.admin-page-title {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-heading);
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.admin-page-description {
+  margin-top: 0.5rem;
+  max-width: 46rem;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.admin-panel {
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background: var(--color-bg-secondary);
+}
+
+.admin-form {
+  display: grid;
+  width: 100%;
+  max-width: 48rem;
+  gap: 1rem;
+  padding: 1.25rem;
+}
+
+.admin-form > div > label:not(.flex) {
+  display: block;
+  margin-bottom: 0.4rem;
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.admin-form
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not(
+    [type="color"]
+  ):not([type="hidden"]),
+.admin-form select,
+.admin-form textarea {
+  width: 100%;
+  min-height: 2.65rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.375rem;
+  background: var(--color-bg-primary);
+  padding: 0.6rem 0.75rem;
+  color: var(--color-text-primary);
+  font: inherit;
+  font-size: 0.875rem;
+}
+
+.admin-form textarea {
+  min-height: 6rem;
+  resize: vertical;
+}
+
+.admin-form input::placeholder,
+.admin-form textarea::placeholder {
+  color: var(--color-text-muted);
+  opacity: 0.8;
+}
+
+.admin-form :is(input, select, textarea):focus-visible {
+  border-color: var(--color-accent);
+  outline-color: var(--color-accent);
+}
+
+.admin-form button[type="submit"] {
+  min-height: 2.75rem;
+  justify-self: start;
+  padding-inline: 1.25rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.admin-theme table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-theme thead {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  text-align: left;
+}
+
+.admin-theme th,
+.admin-theme td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--color-border) 76%, transparent);
+  vertical-align: middle;
+}
+
+.admin-theme th {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.admin-theme tbody tr {
+  transition: background-color 150ms ease;
+}
+
+.admin-theme tbody tr:hover {
+  background: color-mix(in srgb, var(--color-admin-raised) 55%, transparent);
+}
+
+.admin-theme input:not([type="checkbox"]):not([type="radio"]),
+.admin-theme select,
+.admin-theme textarea {
+  accent-color: var(--color-accent);
+}
+
+@media (min-width: 768px) {
+  .admin-page {
+    padding: 2rem;
+  }
+
+  .admin-form {
+    padding: 1.5rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

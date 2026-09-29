@@ -6,6 +6,19 @@ import TimelineClient from "./timeline-client";
 export const metadata: Metadata = {
   title: "Timeline — Farisy's Life Journey",
   description: "The full journey from 2026 into the future.",
+  alternates: { canonical: "/timeline" },
+  openGraph: {
+    title: "Timeline — Farisy's Life Journey",
+    description: "The full journey from 2026 into the future.",
+    url: "/timeline",
+    images: ["/opengraph-image"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Timeline — Farisy's Life Journey",
+    description: "The full journey from 2026 into the future.",
+    images: ["/opengraph-image"],
+  },
 };
 
 export default async function TimelinePage() {
@@ -17,7 +30,10 @@ export default async function TimelinePage() {
         where: { isPublished: true, deletedAt: null },
         select: { data: true, deadline: true, isCompleted: true },
       },
-      achievementGoals: { select: { id: true } },
+      achievementGoals: {
+        where: { visibility: { not: "PRIVATE" } },
+        select: { id: true },
+      },
     },
   });
 

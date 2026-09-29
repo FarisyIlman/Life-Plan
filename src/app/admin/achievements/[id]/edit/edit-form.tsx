@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateAchievementGoal } from "@/lib/actions/achievement-goal";
 import type { AchievementGoal } from "@prisma/client";
+import { uploadToCloudinary } from "@/lib/cloudinary-upload";
 
 const CATEGORIES = [
   "SALARY",
@@ -30,6 +31,9 @@ export default function EditAchievementForm({
   const router = useRouter();
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState(goal.imageUrl || "");
   const [selectedCategory, setSelectedCategory] = useState<string>(
     goal.category,
   );
@@ -53,8 +57,27 @@ export default function EditAchievementForm({
     router.push("/admin/achievements");
   };
 
+  const handleImageChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setUploadError(null);
+    try {
+      setImageUrl(await uploadToCloudinary(file));
+    } catch (error) {
+      setUploadError(
+        error instanceof Error ? error.message : "Image upload failed.",
+      );
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
-    <form action={handleSubmit} className="max-w-lg space-y-4">
+    <form action={handleSubmit} className="admin-form admin-panel">
       {errors._form && (
         <p className="text-red-400 text-sm bg-red-400/10 border border-red-400/30 rounded p-3">
           {errors._form[0]}
@@ -174,6 +197,72 @@ export default function EditAchievementForm({
 
       <div>
         <label className="block text-text-muted text-sm mb-1">
+          Public visibility
+        </label>
+        <select
+          name="visibility"
+          defaultValue={goal.visibility}
+          className="w-full p-2 rounded bg-bg-secondary border border-border text-text-primary"
+        >
+          <option value="PRIVATE">Private: hidden from public</option>
+          <option value="SUMMARY">Summary: category and status only</option>
+          <option value="PUBLIC">Public: selected details may be shown</option>
+        </select>
+      </div>
+
+      <fieldset className="space-y-3 rounded border border-border p-3">
+        <legend className="px-1 text-text-muted text-sm">Public details</legend>
+        <label className="flex items-center gap-2 text-sm text-text-primary">
+          <input type="hidden" name="showValues" value="false" />
+          <input
+            type="checkbox"
+            name="showValues"
+            value="true"
+            defaultChecked={goal.showValues}
+            className="accent-accent"
+          />
+          Show target and actual values (only for Public goals)
+        </label>
+        <label className="flex items-center gap-2 text-sm text-text-primary">
+          <input type="hidden" name="showEvidence" value="false" />
+          <input
+            type="checkbox"
+            name="showEvidence"
+            value="true"
+            defaultChecked={goal.showEvidence}
+            className="accent-accent"
+          />
+          Show evidence image (only for Public goals)
+        </label>
+      </fieldset>
+
+      <div>
+        <label className="block text-text-muted text-sm mb-1">
+          Evidence image (optional)
+        </label>
+        <input
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          onChange={handleImageChange}
+          disabled={uploading}
+          className="block w-full text-sm text-text-muted file:mr-3 file:rounded file:border-0 file:bg-bg-secondary file:px-3 file:py-2 file:text-text-primary"
+        />
+        <input type="hidden" name="imageUrl" value={imageUrl} />
+        {uploading && (
+          <p className="mt-1 text-xs text-text-muted">Uploading image...</p>
+        )}
+        {uploadError && (
+          <p className="mt-1 text-xs text-red-400">{uploadError}</p>
+        )}
+        {imageUrl && (
+          <p className="mt-1 text-xs text-green-400">
+            Evidence image uploaded.
+          </p>
+        )}
+      </div>
+
+      <div>
+        <label className="block text-text-muted text-sm mb-1">
           Note (optional)
         </label>
         <textarea
@@ -186,7 +275,7 @@ export default function EditAchievementForm({
 
       <button
         type="submit"
-        disabled={loading}
+        disabled={loading || uploading}
         className="bg-accent text-white px-6 py-2 rounded font-heading hover:opacity-90"
       >
         {loading ? "Saving..." : "Update Goal"}

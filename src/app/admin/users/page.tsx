@@ -3,6 +3,7 @@ import { auth } from "@/../auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import DeleteAdminButton from "./delete-button";
+import { Plus } from "lucide-react";
 
 export default async function AdminUsersPage() {
   const session = await auth();
@@ -13,19 +14,25 @@ export default async function AdminUsersPage() {
   });
 
   return (
-    <main className="min-h-screen bg-bg-primary text-text-primary p-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="font-heading text-3xl">Admin Users</h1>
+    <main className="admin-page">
+      <header className="admin-page-header">
+        <div>
+          <h1 className="admin-page-title">Admin users</h1>
+          <p className="admin-page-description">
+            Manage accounts with access to the Life Plan CMS.
+          </p>
+        </div>
         <Link
           href="/admin/users/new"
-          className="bg-accent text-white px-4 py-2 rounded font-heading hover:opacity-90"
+          className="inline-flex min-h-10 items-center gap-2 rounded-md bg-accent px-4 text-sm font-medium text-white transition hover:brightness-110"
         >
-          + New Admin
+          <Plus size={16} aria-hidden="true" />
+          New admin
         </Link>
-      </div>
+      </header>
 
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse min-w-[600px]">
+      <div className="admin-panel overflow-x-auto">
+        <table className="w-full border-collapse min-w-150">
           <thead>
             <tr className="border-b border-border text-text-muted text-left text-sm">
               <th className="py-2">Name</th>

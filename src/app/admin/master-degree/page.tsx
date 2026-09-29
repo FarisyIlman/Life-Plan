@@ -12,13 +12,15 @@ export default async function MasterDegreePage() {
   });
 
   return (
-    <main className="min-h-screen bg-bg-primary text-text-primary p-8">
-      <h1 className="font-heading text-3xl mb-2">
-        Master&apos;s Degree Flowchart
-      </h1>
-      <p className="text-text-muted text-sm mb-6">
-        Drag nodes to reposition. Click a node to edit or delete it.
-      </p>
+    <main className="admin-page">
+      <header className="admin-page-header">
+        <div>
+          <h1 className="admin-page-title">Master&apos;s degree flowchart</h1>
+          <p className="admin-page-description">
+            Drag nodes to reposition. Select a node to edit or remove it.
+          </p>
+        </div>
+      </header>
       <FlowchartEditor initialNodes={nodes} />
     </main>
   );

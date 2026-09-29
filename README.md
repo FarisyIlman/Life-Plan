@@ -55,13 +55,15 @@ This is **not a conventional portfolio site** — it's designed to feel like an 
 
 ## Timeline Themes
 
-| Era       | Theme               | Status                                                                              |
-| --------- | ------------------- | ----------------------------------------------------------------------------------- |
-| 2026      | Galaxy              | ✅ Full custom view                                                                 |
-| 2027      | Monthly             | ✅ Full custom view                                                                 |
-| 2028–2030 | Racing / Grand Prix | ✅ Full custom view with Achievement Tracker                                        |
-| 2031–2032 | Voyage              | ✅ Full custom view with interactive Master's Degree flowchart                      |
-| 2033+     | Tree / Growth       | ✅ Full custom view, with a distinct "Beyond" page for the founding-company chapter |
+| Era       | Theme               | Renderer in code | Seed data in repository |
+| --------- | ------------------- | ---------------- | ----------------------- |
+| 2026      | Galaxy              | Yes              | Yes                     |
+| 2027      | Monthly             | Yes              | Yes                     |
+| 2028–2030 | Racing / Grand Prix | Yes              | No                      |
+| 2031–2032 | Voyage              | Yes              | No                      |
+| 2033+     | Tree / Growth       | Yes              | No                      |
+
+The MVP content baseline is 2026–2027. Later-era renderers and CMS support are implemented, but the seed script does not populate those eras. Published production content depends on the database and must be checked in the CMS; this table does not claim that later eras are live.
 
 ## Feature Highlights
 
@@ -71,12 +73,14 @@ This is **not a conventional portfolio site** — it's designed to feel like an 
 - Vertical scroll timeline overview with GSAP-driven mood transitions and theme-colored dot navigation
 - Themed page transitions between the timeline overview and year-detail pages
 - A public, read-only calendar showing upcoming published milestones across the whole timeline
+- Achievement goals support private, summary, and public visibility; numeric values and evidence images require separate explicit opt-ins
 - Fully responsive, with `prefers-reduced-motion` respected throughout
 - SEO-first: dynamic per-page metadata, auto-generated `sitemap.xml` / `robots.txt`, JSON-LD Person schema
 
 ### Admin CMS
 
 - Full CRUD for Eras, Content Blocks, Achievement Goals, and Admin Users
+- Era page variants are selected explicitly in the CMS instead of inferred from URL slugs
 - Interactive React Flow editor for the Master's Degree flowchart (Country → University → Program)
 - Dashboard with live stats, overall progress, and upcoming deadlines
 - Calendar & deadline view with 1/3/7-day filters and overdue markers
@@ -104,7 +108,8 @@ This is **not a conventional portfolio site** — it's designed to feel like an 
 - **Flexible content model** — a single `ContentBlock` model with a `type` + JSON `data` field renders theme-specific UI per era while keeping the backend schema stable. Achievement goals remain era-scoped and use one reusable tracker component.
 - **Edge-safe auth split** — `auth.config.ts` (no Node dependencies) powers route-protection via Next.js 16's `proxy.ts` convention on the Edge runtime, while `auth.ts` (with Prisma) handles full authentication logic on the Node runtime. Every admin server component also re-checks the session directly as defense-in-depth.
 - **Activity logging** — every meaningful admin action (CRUD, completion toggles, bulk operations) is recorded with actor, action, entity, and a JSON detail snapshot.
-- **Deadline notifications** — a cron-triggered, secret-protected endpoint scans `ContentBlock.deadline` and generates `DEADLINE_7D/3D/1D` notifications atomically, using a database-level unique constraint to guarantee no duplicates even under concurrent triggers.
+- **Deadline notifications** — a cron-triggered, secret-protected endpoint scans `ContentBlock.deadline` and calls server-only notification utilities. Database-level unique constraints prevent duplicate notifications under concurrent triggers.
+- **Achievement privacy** — public queries exclude private goals and redact numeric values and evidence URLs unless an admin explicitly allows their display. Existing goals default to private after migration.
 - **Soft delete everywhere** — Eras and Content Blocks use a `deletedAt` timestamp rather than hard deletion, with a Trash UI for restore or permanent removal.
 
 ## Project Structure

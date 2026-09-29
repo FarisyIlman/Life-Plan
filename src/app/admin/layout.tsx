@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/../auth";
+import AdminNavigation from "./admin-navigation";
 
 export default async function AdminLayout({
   children,
@@ -15,79 +15,15 @@ export default async function AdminLayout({
     : 0;
 
   return (
-    <div className="min-h-screen bg-bg-primary text-text-primary">
-      {session?.user && (
-        <nav className="border-b border-border px-4 sm:px-6 py-2 flex items-center justify-between sticky top-0 bg-bg-primary z-40">
-          <div className="flex items-center gap-2 sm:gap-5 overflow-x-auto [&_a]:min-h-11 [&_a]:flex [&_a]:items-center">
-            <Link
-              href="/admin/dashboard"
-              className="font-heading text-sm hover:text-accent whitespace-nowrap"
-            >
-              Dashboard
-            </Link>
-            <Link
-              href="/admin/eras"
-              className="text-sm text-text-muted hover:text-accent whitespace-nowrap"
-            >
-              Eras
-            </Link>
-            <Link
-              href="/admin/content-blocks"
-              className="text-sm text-text-muted hover:text-accent whitespace-nowrap"
-            >
-              Content
-            </Link>
-            <Link
-              href="/admin/achievements"
-              className="text-sm text-text-muted hover:text-accent whitespace-nowrap"
-            >
-              Achievements
-            </Link>
-            <Link
-              href="/admin/calendar"
-              className="text-sm text-text-muted hover:text-accent whitespace-nowrap"
-            >
-              Calendar
-            </Link>
-            <Link
-              href="/admin/master-degree"
-              className="text-sm text-text-muted hover:text-accent whitespace-nowrap"
-            >
-              Masters Flow
-            </Link>
-            <Link
-              href="/admin/notifications"
-              className="relative text-sm text-text-muted hover:text-accent whitespace-nowrap"
-            >
-              Notifications
-              {unreadCount > 0 && (
-                <span className="absolute -top-2 -right-3 bg-red-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
-                  {unreadCount > 9 ? "9+" : unreadCount}
-                </span>
-              )}
-            </Link>
-            <Link
-              href="/admin/users"
-              className="text-sm text-text-muted hover:text-accent whitespace-nowrap"
-            >
-              Admins
-            </Link>
-            <Link
-              href="/admin/logs"
-              className="text-sm text-text-muted hover:text-accent whitespace-nowrap"
-            >
-              Logs
-            </Link>
-            <Link
-              href="/admin/trash"
-              className="text-sm text-text-muted hover:text-accent whitespace-nowrap"
-            >
-              Trash
-            </Link>
-          </div>
-        </nav>
+    <div className="admin-theme min-h-screen bg-admin-canvas text-admin-text">
+      {session?.user ? (
+        <>
+          <AdminNavigation unreadCount={unreadCount} />
+          <div className="min-w-0 lg:ml-64">{children}</div>
+        </>
+      ) : (
+        children
       )}
-      {children}
     </div>
   );
 }

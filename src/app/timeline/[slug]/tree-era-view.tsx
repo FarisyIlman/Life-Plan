@@ -29,7 +29,7 @@ export default function TreeEraView({
   const { total, percentage: progress } = getContentProgress(era.contentBlocks);
   const publicContentBlocks = getPublicContentBlocks(era.contentBlocks);
 
-  const isBeyond = era.slug.toLowerCase().includes("beyond");
+  const isBeyond = era.pageVariant === "BEYOND";
   const founderName = era.founderName || "Farisy";
   const holdingName = era.holdingName || "My Holding Company";
   const operatingName = era.operatingName || "The Company";
@@ -59,7 +59,7 @@ export default function TreeEraView({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="font-heading font-light text-4xl sm:text-5xl md:text-6xl text-text-primary mb-4 break-words"
+          className="font-heading font-light text-4xl sm:text-5xl md:text-6xl text-text-primary mb-4 wrap-break-word"
         >
           {era.title}
         </motion.h1>
@@ -166,11 +166,11 @@ export default function TreeEraView({
         <div className="relative pl-6 border-l border-tree-green/60 space-y-3">
           {publicContentBlocks.slice(0, 4).map((block, index) => (
             <div key={block.id} className="relative flex items-center gap-3">
-              <span className="absolute -left-[31px] h-3 w-3 rounded-full border-2 border-tree-green bg-bg-primary" />
+              <span className="absolute -left-7.75 h-3 w-3 rounded-full border-2 border-tree-green bg-bg-primary" />
               <span className="text-tree-green text-xs font-heading">
                 BRANCH {index + 1}
               </span>
-              <span className="text-text-primary text-sm break-words">
+              <span className="text-text-primary text-sm wrap-break-word">
                 {block.title}
               </span>
             </div>
@@ -212,7 +212,7 @@ export default function TreeEraView({
         {prevEra ? (
           <Link
             href={`/timeline/${prevEra.slug}`}
-            className="min-h-11 flex items-center text-text-muted hover:text-accent transition break-words"
+            className="min-h-11 flex items-center text-text-muted hover:text-accent transition wrap-break-word"
           >
             ← {prevEra.title}
           </Link>
@@ -222,7 +222,7 @@ export default function TreeEraView({
         {nextEra ? (
           <Link
             href={`/timeline/${nextEra.slug}`}
-            className="min-h-11 flex items-center justify-end text-text-muted hover:text-accent transition break-words sm:text-right"
+            className="min-h-11 flex items-center justify-end text-text-muted hover:text-accent transition wrap-break-word sm:text-right"
           >
             {nextEra.title} →
           </Link>

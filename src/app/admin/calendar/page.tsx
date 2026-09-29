@@ -75,11 +75,18 @@ export default async function CalendarPage({
   const nextYear = month === 11 ? year + 1 : year;
 
   return (
-    <main className="min-h-screen bg-bg-primary text-text-primary p-8">
-      <h1 className="font-heading text-3xl mb-6">Calendar & Deadlines</h1>
+    <main className="admin-page">
+      <header className="admin-page-header">
+        <div>
+          <h1 className="admin-page-title">Calendar &amp; deadlines</h1>
+          <p className="admin-page-description">
+            Review due dates and focus the list on the time window that matters.
+          </p>
+        </div>
+      </header>
 
       {/* Filter tabs */}
-      <div className="flex gap-2 mb-6 flex-wrap">
+      <nav aria-label="Filter deadlines" className="mb-6 flex flex-wrap gap-2">
         <Link
           href="/admin/calendar"
           className={`px-3 py-1.5 rounded text-sm ${
@@ -124,15 +131,15 @@ export default async function CalendarPage({
           href="/admin/calendar?range=overdue"
           className={`px-3 py-1.5 rounded text-sm ${
             range === "overdue"
-              ? "bg-red-500 text-white"
-              : "bg-bg-secondary text-red-400 hover:text-red-300"
+              ? "bg-status-danger text-white"
+              : "bg-bg-secondary text-status-danger hover:text-text-primary"
           }`}
         >
           Overdue
         </Link>
-      </div>
+      </nav>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]">
         {/* Calendar grid */}
         <div className="lg:col-span-2">
           <div className="flex justify-between items-center mb-4">

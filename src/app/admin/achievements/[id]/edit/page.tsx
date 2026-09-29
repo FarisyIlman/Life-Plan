@@ -26,8 +26,15 @@ export default async function EditAchievementPage({
   if (!goal) notFound();
 
   return (
-    <main className="min-h-screen bg-bg-primary text-text-primary p-8">
-      <h1 className="font-heading text-3xl mb-6">Edit Achievement Goal</h1>
+    <main className="admin-page">
+      <header className="admin-page-header">
+        <div>
+          <h1 className="admin-page-title">Edit achievement goal</h1>
+          <p className="admin-page-description">
+            Update the target, status, and public visibility settings.
+          </p>
+        </div>
+      </header>
       <EditAchievementForm goal={goal} eras={eras} />
     </main>
   );

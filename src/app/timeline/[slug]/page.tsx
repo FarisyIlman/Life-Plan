@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
+import { getPublicAchievementGoals } from "@/lib/achievement-visibility";
 import GalaxyEraView from "./galaxy-era-view";
 import MonthlyEraView from "./monthly-era-view";
 import RacingEraView from "./racing-era-view";
@@ -15,13 +16,28 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const era = await prisma.era.findUnique({ where: { slug, deletedAt: null } });
+  const era = await prisma.era.findFirst({
+    where: { slug, deletedAt: null, isPublished: true },
+  });
 
   if (!era) return { title: "Not Found" };
 
   return {
     title: `${era.title} | Through The Time`,
     description: era.description || `Explore the ${era.title} era.`,
+    alternates: { canonical: `/timeline/${era.slug}` },
+    openGraph: {
+      title: `${era.title} | Through The Time`,
+      description: era.description || `Explore the ${era.title} era.`,
+      url: `/timeline/${era.slug}`,
+      images: ["/opengraph-image"],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${era.title} | Through The Time`,
+      description: era.description || `Explore the ${era.title} era.`,
+      images: ["/opengraph-image"],
+    },
   };
 }
 
@@ -33,18 +49,24 @@ export default async function EraDetailPage({
   const { slug } = await params;
 
   const era = await prisma.era.findUnique({
-    where: { slug, deletedAt: null },
+    where: { slug, deletedAt: null, isPublished: true },
     include: {
       contentBlocks: {
         where: { isPublished: true, deletedAt: null },
         orderBy: { order: "asc" },
         include: {
           achievementGoal: {
-            select: { year: true, category: true, status: true },
+            select: {
+              year: true,
+              category: true,
+              status: true,
+              visibility: true,
+            },
           },
         },
       },
       achievementGoals: {
+        where: { visibility: { not: "PRIVATE" } },
         orderBy: [{ year: "asc" }, { category: "asc" }],
       },
     },
@@ -54,15 +76,27 @@ export default async function EraDetailPage({
 
   const eraWithGoalContext = {
     ...era,
-    contentBlocks: era.contentBlocks.map((block) => ({
-      ...block,
-      data: {
-        ...(typeof block.data === "object" && block.data !== null
-          ? block.data
-          : {}),
-        linkedGoal: block.achievementGoal,
-      },
-    })),
+    contentBlocks: era.contentBlocks.map((block) => {
+      const { achievementGoal, ...publicBlock } = block;
+
+      return {
+        ...publicBlock,
+        data: {
+          ...(typeof block.data === "object" && block.data !== null
+            ? block.data
+            : {}),
+          linkedGoal:
+            achievementGoal && achievementGoal.visibility !== "PRIVATE"
+              ? {
+                  year: achievementGoal.year,
+                  category: achievementGoal.category,
+                  status: achievementGoal.status,
+                }
+              : null,
+        },
+      };
+    }),
+    achievementGoals: getPublicAchievementGoals(era.achievementGoals),
   };
 
   const allEras = await prisma.era.findMany({

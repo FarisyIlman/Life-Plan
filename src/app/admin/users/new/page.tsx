@@ -7,8 +7,15 @@ export default async function NewAdminPage() {
   if (!session?.user) redirect("/admin/login");
 
   return (
-    <main className="min-h-screen bg-bg-primary text-text-primary p-8">
-      <h1 className="font-heading text-3xl mb-6">New Admin</h1>
+    <main className="admin-page">
+      <header className="admin-page-header">
+        <div>
+          <h1 className="admin-page-title">Create admin account</h1>
+          <p className="admin-page-description">
+            Add an account with full access to the CMS.
+          </p>
+        </div>
+      </header>
       <NewAdminForm />
     </main>
   );

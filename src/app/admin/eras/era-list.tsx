@@ -74,7 +74,9 @@ export default function EraList({ eras: initialEras }: { eras: Era[] }) {
               <td className="py-3">
                 <span
                   className={
-                    era.isPublished ? "text-green-400" : "text-text-muted"
+                    era.isPublished
+                      ? "inline-flex rounded-full bg-status-success/10 px-2 py-1 text-xs font-medium text-status-success"
+                      : "inline-flex rounded-full bg-bg-primary px-2 py-1 text-xs font-medium text-text-muted"
                   }
                 >
                   {era.isPublished ? "Published" : "Draft"}

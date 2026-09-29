@@ -244,8 +244,8 @@ export default function ContentBlockList({
                       <span
                         className={
                           block.isPublished
-                            ? "text-green-400"
-                            : "text-text-muted"
+                            ? "inline-flex rounded-full bg-status-success/10 px-2 py-1 text-xs font-medium text-status-success"
+                            : "inline-flex rounded-full bg-bg-primary px-2 py-1 text-xs font-medium text-text-muted"
                         }
                       >
                         {block.isPublished ? "Published" : "Draft"}

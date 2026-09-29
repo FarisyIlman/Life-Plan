@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { strictBoolean } from "./boolean";
 
 export const achievementGoalSchema = z.object({
   eraId: z.string().min(1, "Era is required"),
@@ -20,7 +21,24 @@ export const achievementGoalSchema = z.object({
   status: z
     .enum(["PENDING", "UNDER_ACHIEVED", "ACHIEVED", "OVER_ACHIEVED"])
     .default("PENDING"),
-  imageUrl: z.string().optional(),
+  visibility: z.enum(["PRIVATE", "SUMMARY", "PUBLIC"]).default("PRIVATE"),
+  showValues: strictBoolean,
+  showEvidence: strictBoolean,
+  imageUrl: z
+    .string()
+    .url()
+    .refine((value) => {
+      try {
+        const url = new URL(value);
+        return (
+          url.protocol === "https:" && url.hostname === "res.cloudinary.com"
+        );
+      } catch {
+        return false;
+      }
+    })
+    .or(z.literal(""))
+    .optional(),
   note: z.string().optional(),
 });
 

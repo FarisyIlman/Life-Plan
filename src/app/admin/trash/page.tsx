@@ -20,11 +20,15 @@ export default async function TrashPage() {
   ]);
 
   return (
-    <main className="min-h-screen bg-bg-primary text-text-primary p-8">
-      <h1 className="font-heading text-3xl mb-2">Trash</h1>
-      <p className="text-text-muted text-sm mb-8">
-        Deleted items are kept here until permanently removed.
-      </p>
+    <main className="admin-page">
+      <header className="admin-page-header">
+        <div>
+          <h1 className="admin-page-title">Trash</h1>
+          <p className="admin-page-description">
+            Deleted items remain here until restored or permanently removed.
+          </p>
+        </div>
+      </header>
       <TrashList eras={deletedEras} blocks={deletedBlocks} />
     </main>
   );

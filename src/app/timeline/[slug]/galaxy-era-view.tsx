@@ -2,14 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import type { Era, ContentBlock } from "@prisma/client";
 import CardGalaxyTheme from "@/components/CardGalaxyTheme";
 import type { AchievementGoal } from "@prisma/client";
 import AchievementTracker from "@/components/AchievementTracker";
 import EraReflection from "@/components/EraReflection";
-import { getContentProgress } from "@/lib/content-progress";
-import { getPublicContentBlocks } from "@/lib/content-progress";
+import {
+  getContentProgress,
+  getPublicContentBlocks,
+} from "@/lib/content-progress";
 
 type EraWithBlocks = Era & {
   contentBlocks: ContentBlock[];
@@ -39,6 +41,7 @@ export default function GalaxyEraView({
       (a, b) => (a.deadline?.getTime() ?? 0) - (b.deadline?.getTime() ?? 0),
     )[0]?.deadline;
   const [signalFilter, setSignalFilter] = useState<SignalFilter>("ALL");
+  const prefersReducedMotion = useReducedMotion() ?? false;
   const visibleBlocks = publicBlocks.filter((block) => {
     if (signalFilter === "ACTIVE") return !block.isCompleted;
     if (signalFilter === "COMPLETED") return block.isCompleted;
@@ -48,138 +51,130 @@ export default function GalaxyEraView({
   });
 
   return (
-    <div className="min-h-screen bg-bg-primary relative">
-      {/* Galaxy background glow */}
-      <div className="absolute inset-0 -z-10 bg-linear-to-b from-galaxy-purple/10 via-transparent to-transparent" />
-
-      {/* Breadcrumb */}
-      <div className="px-6 pt-20">
+    <div className="galaxy-page relative min-h-screen text-text-primary">
+      <div className="mx-auto max-w-6xl px-6 pt-8">
         <Link
           href="/timeline"
-          className="text-text-muted text-sm hover:text-accent"
+          className="inline-flex min-h-10 items-center text-sm text-text-muted transition-colors hover:text-galaxy-cyan"
         >
-          ← Back to Timeline
+          <span aria-hidden="true" className="mr-2">
+            ←
+          </span>
+          Timeline
         </Link>
       </div>
 
-      {/* Hero */}
-      <section className="text-center px-6 py-16">
-        <p className="text-galaxy-gold font-heading tracking-widest text-sm mb-2">
-          {era.startYear === era.endYear
-            ? era.startYear
-            : `${era.startYear}–${era.endYear}`}
-        </p>
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="font-galaxy text-4xl sm:text-5xl md:text-6xl text-text-primary mb-4 break-words"
-        >
-          {era.title}
-        </motion.h1>
-        {era.description && (
-          <p className="text-text-muted max-w-xl mx-auto">{era.description}</p>
-        )}
-
-        {/* Progress indicator */}
-        {total > 0 && (
-          <div className="max-w-md mx-auto mt-8">
-            <div className="flex justify-between text-xs text-text-muted mb-1">
-              <span>Progress</span>
-              <span>{progress}%</span>
-            </div>
-            <div
-              className="h-2 bg-bg-secondary rounded-full overflow-hidden"
-              role="progressbar"
-              aria-label="Mission progress"
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-valuenow={progress}
+      <section className="galaxy-hero">
+        <div className="mx-auto max-w-6xl">
+          <div className="max-w-3xl">
+            <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-galaxy-purple/30 bg-galaxy-purple/8 px-3 py-1.5 text-xs font-medium uppercase text-galaxy-purple">
+              <span className="h-1.5 w-1.5 rounded-full bg-galaxy-cyan" />
+              Galaxy journey
+              <span className="text-text-muted" aria-hidden="true">
+                /
+              </span>
+              <span className="text-text-muted">
+                {era.startYear === era.endYear
+                  ? era.startYear
+                  : `${era.startYear}–${era.endYear}`}
+              </span>
+            </p>
+            <motion.h1
+              initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: prefersReducedMotion ? 0 : 0.5 }}
+              className="max-w-3xl wrap-break-word font-galaxy text-4xl leading-tight text-text-primary sm:text-5xl md:text-6xl"
             >
-              <div
-                className="h-full bg-galaxy-cyan transition-all duration-700"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
+              {era.title}
+            </motion.h1>
+            {era.description && (
+              <p className="mt-5 max-w-2xl text-base leading-7 text-text-muted">
+                {era.description}
+              </p>
+            )}
           </div>
-        )}
+
+          {total > 0 && (
+            <div className="mt-9 max-w-2xl border-l-2 border-galaxy-cyan/55 pl-4 sm:pl-5">
+              <div className="mb-2 flex items-baseline justify-between gap-4">
+                <span className="text-sm font-medium text-text-primary">
+                  Mission progress
+                </span>
+                <span className="font-galaxy text-lg text-galaxy-cyan">
+                  {progress}%
+                </span>
+              </div>
+              <div
+                className="h-1.5 overflow-hidden rounded-full bg-white/10"
+                role="progressbar"
+                aria-label="Mission progress"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={progress}
+              >
+                <div
+                  className="h-full rounded-full bg-galaxy-cyan transition-[width] duration-700"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <p className="mt-2 text-xs text-text-muted">
+                {completed} of {total} mission signals completed
+              </p>
+            </div>
+          )}
+        </div>
       </section>
 
-      <section
-        className="px-6 pb-12 max-w-5xl mx-auto"
-        aria-label="Mission overview"
-      >
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="border border-galaxy-purple/40 bg-bg-secondary/60 p-4 rounded-lg">
-            <p className="text-galaxy-purple text-xs font-heading tracking-wider uppercase">
-              Signals
+      <section className="galaxy-overview px-6" aria-label="Mission overview">
+        <div className="mx-auto flex max-w-6xl flex-col gap-5 py-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap items-center gap-x-8 gap-y-2 text-sm">
+            <p className="text-text-muted">
+              <span className="font-medium text-text-primary">{total}</span>{" "}
+              mission signals
             </p>
-            <p className="font-galaxy text-2xl text-text-primary mt-1">
-              {total}
-            </p>
-          </div>
-          <div className="border border-galaxy-cyan/40 bg-bg-secondary/60 p-4 rounded-lg">
-            <p className="text-galaxy-cyan text-xs font-heading tracking-wider uppercase">
-              Completed
-            </p>
-            <p className="font-galaxy text-2xl text-text-primary mt-1">
-              {completed}
+            <p className="text-text-muted">
+              Next deadline{" "}
+              <span className="font-medium text-galaxy-gold">
+                {nextDeadline
+                  ? nextDeadline.toLocaleDateString("en-GB")
+                  : "None scheduled"}
+              </span>
             </p>
           </div>
-          <div className="border border-galaxy-gold/40 bg-bg-secondary/60 p-4 rounded-lg">
-            <p className="text-galaxy-gold text-xs font-heading tracking-wider uppercase">
-              Next deadline
-            </p>
-            <p className="font-heading text-sm text-text-primary mt-2">
-              {nextDeadline
-                ? nextDeadline.toLocaleDateString("en-GB")
-                : "No active deadline"}
-            </p>
-          </div>
+          <p className="text-xs text-text-muted" aria-live="polite">
+            Showing {visibleBlocks.length} of {publicBlocks.length} signals
+          </p>
         </div>
-        <div
-          className="flex flex-wrap gap-x-5 gap-y-2 mt-5 text-xs text-text-muted font-heading"
-          aria-label="Constellation legend"
-        >
-          <span>
-            <span className="inline-block h-2 w-2 rounded-full bg-galaxy-purple mr-2" />
-            Mission signal
-          </span>
-          <span>
-            <span className="inline-block h-2 w-2 rounded-full bg-galaxy-cyan mr-2" />
-            Active work
-          </span>
-          <span>
-            <span className="inline-block h-2 w-2 rounded-full bg-galaxy-gold mr-2" />
-            Deadline
-          </span>
-        </div>
-        <div
-          className="flex flex-wrap gap-2 mt-5"
-          aria-label="Mission signal filters"
-        >
-          {(
-            [
-              ["ALL", "All signals"],
-              ["ACTIVE", "Active"],
-              ["COMPLETED", "Completed"],
-              ["DEADLINES", "Deadlines"],
-            ] as const
-          ).map(([value, label]) => (
-            <button
-              key={value}
-              type="button"
-              aria-pressed={signalFilter === value}
-              onClick={() => setSignalFilter(value)}
-              className={`rounded border px-3 py-2 text-xs transition-colors ${
-                signalFilter === value
-                  ? "border-galaxy-cyan bg-galaxy-cyan/10 text-galaxy-cyan"
-                  : "border-border text-text-muted hover:border-galaxy-cyan/60 hover:text-text-primary"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
+
+        <div className="mx-auto flex max-w-6xl flex-col gap-2 pb-5 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs font-medium text-text-muted">Filter missions</p>
+          <div
+            className="flex flex-wrap gap-2"
+            aria-label="Mission signal filters"
+          >
+            {(
+              [
+                ["ALL", "All signals"],
+                ["ACTIVE", "Active"],
+                ["COMPLETED", "Completed"],
+                ["DEADLINES", "Deadlines"],
+              ] as const
+            ).map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={signalFilter === value}
+                onClick={() => setSignalFilter(value)}
+                className={`min-h-10 rounded-md border px-3 text-xs font-medium transition-colors ${
+                  signalFilter === value
+                    ? "border-galaxy-cyan/50 bg-galaxy-cyan/10 text-galaxy-cyan"
+                    : "border-white/10 bg-white/2 text-text-muted hover:border-galaxy-cyan/35 hover:text-text-primary"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -192,8 +187,17 @@ export default function GalaxyEraView({
         fontClassName="font-heading"
       />
 
-      {/* Content blocks grid */}
-      <section className="px-6 pb-20 max-w-5xl mx-auto">
+      <section className="mx-auto max-w-6xl px-6 pb-20 pt-10">
+        <div className="mb-5 flex items-end justify-between gap-4">
+          <div>
+            <p className="text-xs font-medium uppercase text-galaxy-purple">
+              Constellation map
+            </p>
+            <h2 className="mt-1 font-heading text-xl font-semibold text-text-primary">
+              Mission signals
+            </h2>
+          </div>
+        </div>
         {total === 0 ? (
           <p className="text-text-muted text-center">
             No content yet for this era.
@@ -203,14 +207,14 @@ export default function GalaxyEraView({
             No signals match this filter.
           </p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
             {visibleBlocks.map((block, index) => (
-              <div key={block.id} className="relative">
-                <span className="absolute -left-2 -top-2 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-galaxy-cyan/60 bg-bg-primary text-[10px] text-galaxy-cyan font-galaxy">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                <CardGalaxyTheme block={block} />
-              </div>
+              <CardGalaxyTheme
+                key={block.id}
+                block={block}
+                sequence={index + 1}
+                reduceMotion={prefersReducedMotion}
+              />
             ))}
           </div>
         )}
@@ -236,7 +240,7 @@ export default function GalaxyEraView({
         {prevEra ? (
           <Link
             href={`/timeline/${prevEra.slug}`}
-            className="min-h-11 flex items-center text-text-muted hover:text-accent transition break-words"
+            className="min-h-11 flex items-center text-text-muted hover:text-accent transition wrap-break-word"
           >
             ← {prevEra.title}
           </Link>
@@ -246,7 +250,7 @@ export default function GalaxyEraView({
         {nextEra ? (
           <Link
             href={`/timeline/${nextEra.slug}`}
-            className="min-h-11 flex items-center justify-end text-text-muted hover:text-accent transition break-words sm:text-right"
+            className="min-h-11 flex items-center justify-end text-text-muted hover:text-accent transition wrap-break-word sm:text-right"
           >
             {nextEra.title} →
           </Link>

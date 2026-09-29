@@ -30,8 +30,15 @@ export default async function EditContentBlockPage({
   if (!block) notFound();
 
   return (
-    <main className="min-h-screen bg-bg-primary text-text-primary p-8">
-      <h1 className="font-heading text-3xl mb-6">Edit Content Block</h1>
+    <main className="admin-page">
+      <header className="admin-page-header">
+        <div>
+          <h1 className="admin-page-title">Edit content block</h1>
+          <p className="admin-page-description">
+            Update the milestone and check the theme preview before saving.
+          </p>
+        </div>
+      </header>
       <EditContentBlockForm block={block} eras={eras} goals={goals} />
     </main>
   );

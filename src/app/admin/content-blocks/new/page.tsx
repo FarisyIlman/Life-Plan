@@ -20,8 +20,15 @@ export default async function NewContentBlockPage() {
   ]);
 
   return (
-    <main className="min-h-screen bg-bg-primary text-text-primary p-8">
-      <h1 className="font-heading text-3xl mb-6">New Content Block</h1>
+    <main className="admin-page">
+      <header className="admin-page-header">
+        <div>
+          <h1 className="admin-page-title">Create content block</h1>
+          <p className="admin-page-description">
+            Add a milestone and preview how it will appear in its era.
+          </p>
+        </div>
+      </header>
       <NewContentBlockForm eras={eras} goals={goals} />
     </main>
   );

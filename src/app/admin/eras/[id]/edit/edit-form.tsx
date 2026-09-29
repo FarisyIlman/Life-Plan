@@ -29,7 +29,7 @@ export default function EditEraForm({ era }: { era: Era }) {
   };
 
   return (
-    <form action={handleSubmit} className="max-w-lg space-y-4">
+    <form action={handleSubmit} className="admin-form admin-panel">
       {errors._form && (
         <p className="text-red-400 text-sm bg-red-400/10 border border-red-400/30 rounded p-3">
           {errors._form[0]}
@@ -74,6 +74,23 @@ export default function EditEraForm({ era }: { era: Era }) {
         </select>
         {errors.theme && (
           <p className="text-red-400 text-sm mt-1">{errors.theme[0]}</p>
+        )}
+      </div>
+
+      <div>
+        <label className="block text-text-muted text-sm mb-1">
+          Page variant
+        </label>
+        <select
+          name="pageVariant"
+          defaultValue={era.pageVariant}
+          className="w-full p-2 rounded bg-bg-secondary border border-border text-text-primary"
+        >
+          <option value="STANDARD">Standard era</option>
+          <option value="BEYOND">Beyond company chapter (Tree only)</option>
+        </select>
+        {errors.pageVariant && (
+          <p className="text-red-400 text-sm mt-1">{errors.pageVariant[0]}</p>
         )}
       </div>
 

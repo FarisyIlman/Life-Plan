@@ -3,6 +3,7 @@ import Link from "next/link";
 import { auth } from "@/../auth";
 import { redirect } from "next/navigation";
 import EraList from "./era-list";
+import { Plus } from "lucide-react";
 
 export default async function ErasPage() {
   const session = await auth();
@@ -14,25 +15,33 @@ export default async function ErasPage() {
   });
 
   return (
-    <main className="min-h-screen bg-bg-primary text-text-primary p-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="font-heading text-3xl">Era Management</h1>
+    <main className="admin-page">
+      <header className="admin-page-header">
+        <div>
+          <h1 className="admin-page-title">Era management</h1>
+          <p className="admin-page-description">
+            Organize published chapters, themes, and their timeline order.
+          </p>
+        </div>
         <Link
           href="/admin/eras/new"
-          className="bg-accent text-white px-4 py-2 rounded font-heading hover:opacity-90"
+          className="inline-flex min-h-10 items-center gap-2 rounded-md bg-accent px-4 text-sm font-medium text-white transition hover:brightness-110"
         >
-          + New Era
+          <Plus size={16} aria-hidden="true" />
+          New era
         </Link>
-      </div>
+      </header>
 
-      <p className="text-text-muted text-sm mb-4">
-        Drag rows by the ⋮⋮ handle to reorder eras.
+      <p className="mb-4 text-xs text-text-muted">
+        Drag a row to change its position in the public timeline.
       </p>
 
-      <EraList eras={eras} />
+      <div className="admin-panel overflow-hidden">
+        <EraList eras={eras} />
+      </div>
 
       {eras.length === 0 && (
-        <p className="text-text-muted mt-8">
+        <p className="mt-6 text-center text-sm text-text-muted">
           No eras yet. Create your first one.
         </p>
       )}

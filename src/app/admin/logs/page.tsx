@@ -13,10 +13,17 @@ export default async function LogsPage() {
   });
 
   return (
-    <main className="min-h-screen bg-bg-primary text-text-primary p-8">
-      <h1 className="font-heading text-3xl mb-6">Activity Logs</h1>
+    <main className="admin-page">
+      <header className="admin-page-header">
+        <div>
+          <h1 className="admin-page-title">Activity log</h1>
+          <p className="admin-page-description">
+            A recent audit trail of changes made by admin accounts.
+          </p>
+        </div>
+      </header>
 
-      <div className="overflow-x-auto">
+      <div className="admin-panel overflow-x-auto">
         <table className="w-full border-collapse min-w-150">
           <thead>
             <tr className="border-b border-border text-text-muted text-left text-sm">
@@ -38,10 +45,10 @@ export default async function LogsPage() {
                   <span
                     className={
                       log.action === "CREATE"
-                        ? "text-green-400"
+                        ? "text-status-success"
                         : log.action === "UPDATE"
-                          ? "text-monthly-blue"
-                          : "text-red-400"
+                          ? "text-admin-accent"
+                          : "text-status-danger"
                     }
                   >
                     {log.action}
@@ -58,7 +65,9 @@ export default async function LogsPage() {
       </div>
 
       {logs.length === 0 && (
-        <p className="text-text-muted mt-8">No activity yet.</p>
+        <p className="admin-panel mt-4 px-5 py-8 text-center text-sm text-text-muted">
+          No activity yet.
+        </p>
       )}
     </main>
   );
