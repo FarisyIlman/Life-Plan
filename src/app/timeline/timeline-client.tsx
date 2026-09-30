@@ -2,21 +2,25 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import type { Era } from "@prisma/client";
+import { useReducedMotion } from "framer-motion";
 import SmoothScrollProvider from "@/components/SmoothScrollProvider";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
+import {
+  filterTimelineEras,
+  type TimelineFilter,
+  type TimelineSignals,
+} from "@/lib/timeline-utils";
 
-type TimelineEra = Era & {
-  contentBlocks: {
-    data: unknown;
-    deadline: Date | null;
-    isCompleted: boolean;
-  }[];
-  achievementGoals: { id: string }[];
+type TimelineEra = {
+  id: string;
+  slug: string;
+  title: string;
+  theme: string;
+  startYear: number;
+  endYear: number;
+  description: string | null;
+  signals: TimelineSignals;
 };
-
-type TimelineFilter =
-  "ALL" | "GOALS" | "PROJECTS" | "EVIDENCE" | "UPCOMING" | "COMPLETED";
 
 const THEME_COLORS: Record<string, string> = {
   GALAXY: "#6D28D9",
@@ -25,71 +29,59 @@ const THEME_COLORS: Record<string, string> = {
   VOYAGE: "#1E3A8A",
   TREE: "#166534",
 };
-type TimelineSummary = {
-  goals: number;
-  projects: number;
-  completed: number;
-  evidence: number;
-  upcoming: number;
-};
-
 export default function TimelineClient({
   eras,
   summary,
 }: {
   eras: TimelineEra[];
-  summary: TimelineSummary;
+  summary: TimelineSignals;
 }) {
   const sectionRefs = useRef<(HTMLElement | null)[]>([]);
   const bgRef = useRef<HTMLDivElement | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [filter, setFilter] = useState<TimelineFilter>("ALL");
+  const prefersReducedMotion = useReducedMotion() ?? false;
 
-  const visibleEras = eras.filter((era) => {
-    if (filter === "ALL") return true;
-    if (filter === "GOALS") return era.achievementGoals.length > 0;
-    if (filter === "PROJECTS") return era.contentBlocks.length > 0;
-    if (filter === "COMPLETED")
-      return era.contentBlocks.some((block) => block.isCompleted);
-    if (filter === "UPCOMING")
-      return era.contentBlocks.some(
-        (block) => block.deadline && block.deadline >= new Date(),
-      );
-    return era.contentBlocks.some((block) => {
-      const data = block.data as { evidenceUrl?: string; visibility?: string };
-      return Boolean(data.evidenceUrl) && data.visibility !== "PRIVATE";
-    });
-  });
+  const visibleEras = filterTimelineEras(eras, filter);
+  const visibleEraSignature = visibleEras
+    .map((era) => `${era.id}:${era.theme}`)
+    .join("|");
 
   useEffect(() => {
+    const moodLayer = bgRef.current;
+    if (!moodLayer) return;
+
     const ctx = gsap.context(() => {
-      sectionRefs.current.forEach((section, i) => {
+      sectionRefs.current.forEach((section) => {
         if (!section) return;
-        const era = visibleEras[i];
-        const color = THEME_COLORS[era.theme] || "#7C6FEF";
+        const color = THEME_COLORS[section.dataset.theme ?? ""] || "#7C6FEF";
+        const updateMood = () => {
+          if (prefersReducedMotion) {
+            gsap.set(moodLayer, { backgroundColor: color, opacity: 0.15 });
+            return;
+          }
+          gsap.to(moodLayer, {
+            backgroundColor: color,
+            opacity: 0.15,
+            duration: 0.8,
+          });
+        };
 
         ScrollTrigger.create({
           trigger: section,
           start: "top center",
           end: "bottom center",
-          onEnter: () =>
-            gsap.to(bgRef.current, {
-              backgroundColor: color,
-              opacity: 0.15,
-              duration: 0.8,
-            }),
-          onEnterBack: () =>
-            gsap.to(bgRef.current, {
-              backgroundColor: color,
-              opacity: 0.15,
-              duration: 0.8,
-            }),
+          onEnter: updateMood,
+          onEnterBack: updateMood,
         });
       });
     });
 
-    return () => ctx.revert();
-  }, [visibleEras]);
+    return () => {
+      ctx.revert();
+      gsap.killTweensOf(moodLayer);
+    };
+  }, [prefersReducedMotion, visibleEraSignature]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -106,54 +98,84 @@ export default function TimelineClient({
       { rootMargin: "-35% 0px -35%", threshold: [0.2, 0.5, 0.8] },
     );
 
-    sectionRefs.current.forEach((section) => {
+    const sections = sectionRefs.current.filter(
+      (section): section is HTMLElement => section !== null,
+    );
+    sections.forEach((section) => {
       if (section) observer.observe(section);
     });
 
     return () => observer.disconnect();
-  }, [visibleEras.length]);
+  }, [visibleEraSignature]);
 
   const scrollToSection = (index: number) => {
-    sectionRefs.current[index]?.scrollIntoView({ behavior: "smooth" });
+    sectionRefs.current[index]?.scrollIntoView({
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+    });
   };
 
   return (
     <SmoothScrollProvider>
-      <div className="relative">
-        <div className="sticky top-0 z-30 flex flex-wrap justify-center gap-2 px-6 py-4 bg-bg-primary/90 backdrop-blur border-b border-border">
-          {(
-            [
-              ["ALL", "All"],
-              ["GOALS", "Goals"],
-              ["PROJECTS", "Projects"],
-              ["EVIDENCE", "Evidence"],
-              ["UPCOMING", "Upcoming"],
-              ["COMPLETED", "Completed"],
-            ] as const
-          ).map(([value, label]) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => {
-                setFilter(value);
-                setActiveIndex(0);
-              }}
-              aria-pressed={filter === value}
-              className={`px-3 py-2 rounded text-xs font-heading border transition ${
-                filter === value
-                  ? "bg-accent text-white border-accent"
-                  : "text-text-muted border-border hover:text-text-primary"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-        <section className="px-6 pt-10 pb-4 max-w-5xl mx-auto">
-          <p className="text-text-muted text-xs tracking-widest font-heading mb-3">
+      <main className="relative">
+        <header className="mx-auto max-w-5xl px-6 pb-5 pt-24">
+          <p className="mb-2 text-xs tracking-widest text-text-muted font-heading">
             ROADMAP SIGNALS
           </p>
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+          <h1 className="font-heading text-3xl text-text-primary sm:text-4xl">
+            Life timeline
+          </h1>
+          <p className="mt-2 text-sm text-text-muted">From 2026 onward</p>
+        </header>
+
+        <div className="sticky top-14 z-30 border-b border-border bg-bg-primary/95 px-4 py-3 backdrop-blur sm:px-6">
+          <div
+            role="group"
+            aria-label="Filter timeline eras"
+            className="flex flex-wrap justify-center gap-2"
+          >
+            {(
+              [
+                ["ALL", "All"],
+                ["GOALS", "Goals"],
+                ["PROJECTS", "Projects"],
+                ["EVIDENCE", "Evidence"],
+                ["UPCOMING", "Upcoming"],
+                ["COMPLETED", "Completed"],
+              ] as const
+            ).map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => {
+                  setFilter(value);
+                  setActiveIndex(0);
+                }}
+                aria-pressed={filter === value}
+                className={`min-h-11 rounded border px-3 text-xs font-heading transition ${
+                  filter === value
+                    ? "bg-accent text-white border-accent"
+                    : "text-text-muted border-border hover:text-text-primary"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <p
+            className="mt-2 text-center text-xs text-text-muted"
+            aria-live="polite"
+          >
+            Showing {visibleEras.length} of {eras.length} eras
+          </p>
+        </div>
+        <section
+          className="mx-auto max-w-5xl px-6 pb-4 pt-10"
+          aria-label="Timeline overview"
+        >
+          <h2 className="mb-3 font-heading text-lg text-text-primary">
+            At a glance
+          </h2>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
             {[
               ["Goals", summary.goals],
               ["Projects", summary.projects],
@@ -173,6 +195,37 @@ export default function TimelineClient({
             ))}
           </div>
         </section>
+
+        {visibleEras.length > 0 && (
+          <nav
+            aria-label="Jump to an era"
+            className="flex gap-2 overflow-x-auto px-6 pb-3 sm:hidden"
+          >
+            {visibleEras.map((era, index) => (
+              <button
+                key={era.id}
+                type="button"
+                onClick={() => scrollToSection(index)}
+                aria-current={activeIndex === index ? "location" : undefined}
+                className={`min-h-11 shrink-0 rounded-full border px-4 text-xs font-medium transition-colors ${
+                  activeIndex === index
+                    ? "text-text-primary"
+                    : "border-border text-text-muted"
+                }`}
+                style={{
+                  borderColor: THEME_COLORS[era.theme] || "#7C6FEF",
+                  backgroundColor:
+                    activeIndex === index
+                      ? `${THEME_COLORS[era.theme] || "#7C6FEF"}26`
+                      : "transparent",
+                }}
+              >
+                {era.title}
+              </button>
+            ))}
+          </nav>
+        )}
+
         {/* Background mood layer */}
         <div
           ref={bgRef}
@@ -181,7 +234,10 @@ export default function TimelineClient({
         />
 
         {/* Dot navigation */}
-        <div className="fixed right-1 sm:right-6 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-1">
+        <nav
+          aria-label="Jump to an era"
+          className="fixed right-1 top-1/2 z-40 hidden -translate-y-1/2 flex-col gap-1 sm:right-6 sm:flex"
+        >
           {visibleEras.map((era, i) => {
             const color = THEME_COLORS[era.theme] || "#7C6FEF";
             return (
@@ -198,7 +254,7 @@ export default function TimelineClient({
                   (e.currentTarget.style.backgroundColor = "transparent")
                 }
                 aria-label={`Jump to ${era.title}`}
-                aria-current={activeIndex === i ? "true" : undefined}
+                aria-current={activeIndex === i ? "location" : undefined}
                 title={era.title}
               >
                 <span
@@ -213,11 +269,21 @@ export default function TimelineClient({
               </button>
             );
           })}
-        </div>
+        </nav>
 
         {visibleEras.length === 0 ? (
-          <section className="min-h-screen flex items-center justify-center px-6 text-center">
+          <section
+            className="flex min-h-[60vh] flex-col items-center justify-center gap-4 px-6 text-center"
+            aria-live="polite"
+          >
             <p className="text-text-muted">No eras match this filter yet.</p>
+            <button
+              type="button"
+              onClick={() => setFilter("ALL")}
+              className="min-h-11 rounded border border-border px-4 text-sm text-text-primary transition hover:border-accent"
+            >
+              Show all eras
+            </button>
           </section>
         ) : (
           visibleEras.map((era, i) => (
@@ -226,6 +292,7 @@ export default function TimelineClient({
               ref={(el) => {
                 sectionRefs.current[i] = el;
               }}
+              data-theme={era.theme}
               className="min-h-screen flex flex-col items-center justify-center text-center px-6"
             >
               <p className="text-text-muted text-sm mb-2">
@@ -243,6 +310,7 @@ export default function TimelineClient({
               )}
               <Link
                 href={`/timeline/${era.slug}`}
+                aria-label={`View details for ${era.title}`}
                 className="text-white px-6 py-3 rounded font-heading hover:opacity-90 transition"
                 style={{
                   backgroundColor: THEME_COLORS[era.theme] || "#7C6FEF",
@@ -253,7 +321,7 @@ export default function TimelineClient({
             </section>
           ))
         )}
-      </div>
+      </main>
     </SmoothScrollProvider>
   );
 }

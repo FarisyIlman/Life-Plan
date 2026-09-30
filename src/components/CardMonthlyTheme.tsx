@@ -1,16 +1,18 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
 import type { ContentBlock } from "@prisma/client";
 import type { ContentBlockPreview } from "@/lib/types";
 import MarkdownContent from "@/components/MarkdownContent";
+import { formatTimelineDate } from "@/lib/timeline-utils";
 
 export default function CardMonthlyTheme({
   block,
 }: {
   block: ContentBlock | ContentBlockPreview;
 }) {
+  const prefersReducedMotion = useReducedMotion() ?? false;
   const data = block.data as {
     description?: string;
     why?: string;
@@ -31,16 +33,16 @@ export default function CardMonthlyTheme({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
+      whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: prefersReducedMotion ? 0 : 0.5 }}
       className="bg-bg-secondary border border-border rounded-lg p-5 border-l-4"
       style={{ borderLeftColor: "var(--color-theme-monthly)" }}
     >
       {block.deadline && (
         <p className="text-monthly-blue text-xs mb-1 font-heading">
-          {new Date(block.deadline).toLocaleDateString("en-GB")}
+          {formatTimelineDate(new Date(block.deadline))}
         </p>
       )}
 

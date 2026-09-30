@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
 import type { AchievementGoal } from "@prisma/client";
 import { THEME_CONFIG, type ThemeKey } from "@/lib/theme-config";
@@ -57,6 +57,7 @@ export default function AchievementTracker({
   goals: AchievementGoal[];
   theme?: ThemeKey;
 }) {
+  const prefersReducedMotion = useReducedMotion() ?? false;
   if (goals.length === 0) return null;
 
   const themeConfig = THEME_CONFIG[theme];
@@ -72,10 +73,10 @@ export default function AchievementTracker({
     return (
       <motion.div
         key={goal.id}
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
+        initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
+        whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: prefersReducedMotion ? 0 : 0.5 }}
         className="bg-bg-secondary border border-border rounded-lg p-5 border-l-4"
         style={{ borderLeftColor: themeConfig.accentVar }}
       >

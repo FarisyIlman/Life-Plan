@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import type { Era, ContentBlock, AchievementGoal } from "@prisma/client";
 import AchievementTracker from "@/components/AchievementTracker";
 import MarkdownContent from "@/components/MarkdownContent";
@@ -23,6 +23,7 @@ export default function RacingEraView({
   prevEra: EraNav;
   nextEra: EraNav;
 }) {
+  const prefersReducedMotion = useReducedMotion() ?? false;
   // Group achievement goals by year
   const goalsByYear = new Map<number, AchievementGoal[]>();
   for (const goal of era.achievementGoals) {
@@ -75,9 +76,9 @@ export default function RacingEraView({
           {era.startYear}–{era.endYear} GRAND PRIX
         </p>
         <motion.h1
-          initial={{ opacity: 0, y: 20 }}
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: prefersReducedMotion ? 0 : 0.8 }}
           className="font-racing text-4xl sm:text-5xl md:text-6xl text-text-primary mb-4 break-words"
         >
           {era.title}

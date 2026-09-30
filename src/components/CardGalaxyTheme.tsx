@@ -6,6 +6,7 @@ import { ArrowUpRight, CalendarDays, Check } from "lucide-react";
 import type { ContentBlock } from "@prisma/client";
 import type { ContentBlockPreview } from "@/lib/types";
 import MarkdownContent from "@/components/MarkdownContent";
+import { formatTimelineDate } from "@/lib/timeline-utils";
 
 export default function CardGalaxyTheme({
   block,
@@ -57,7 +58,7 @@ export default function CardGalaxyTheme({
         ) : block.deadline ? (
           <span className="inline-flex min-h-7 items-center gap-1.5 rounded-full border border-galaxy-gold/25 bg-galaxy-gold/8 px-2.5 text-xs font-medium text-galaxy-gold">
             <CalendarDays size={13} aria-hidden="true" />
-            {new Date(block.deadline).toLocaleDateString("en-GB")}
+            {formatTimelineDate(new Date(block.deadline))}
           </span>
         ) : null}
       </div>

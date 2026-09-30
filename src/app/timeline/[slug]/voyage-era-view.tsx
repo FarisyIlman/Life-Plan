@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import type {
   Era,
   ContentBlock,
@@ -34,6 +34,7 @@ export default function VoyageEraView({
   nextEra: EraNav;
   flowchartNodes: MasterDegreeNode[];
 }) {
+  const prefersReducedMotion = useReducedMotion() ?? false;
   const { total, percentage: progress } = getContentProgress(era.contentBlocks);
   const publicContentBlocks = getPublicContentBlocks(era.contentBlocks);
 
@@ -58,9 +59,9 @@ export default function VoyageEraView({
           · THE VOYAGE
         </p>
         <motion.h1
-          initial={{ opacity: 0, y: 20 }}
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: prefersReducedMotion ? 0 : 0.8 }}
           className="font-voyage text-4xl sm:text-5xl md:text-6xl text-text-primary mb-4 break-words"
         >
           {era.title}

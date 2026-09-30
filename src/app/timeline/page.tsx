@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
-import { getPublicContentBlocks } from "@/lib/content-progress";
+import { getTimelineSignals, getTimelineSummary } from "@/lib/timeline-utils";
 import TimelineClient from "./timeline-client";
 
 export const metadata: Metadata = {
@@ -37,27 +37,18 @@ export default async function TimelinePage() {
     },
   });
 
-  const summary = eras.reduce(
-    (result, era) => {
-      const publicBlocks = getPublicContentBlocks(era.contentBlocks);
-      result.goals += era.achievementGoals.length;
-      result.projects += publicBlocks.length;
-      result.completed += publicBlocks.filter(
-        (block) => block.isCompleted,
-      ).length;
-      result.evidence += publicBlocks.filter((block) => {
-        const data = block.data as {
-          evidenceUrl?: string;
-        };
-        return Boolean(data.evidenceUrl);
-      }).length;
-      result.upcoming += publicBlocks.filter(
-        (block) => block.deadline && block.deadline >= new Date(),
-      ).length;
-      return result;
-    },
-    { goals: 0, projects: 0, completed: 0, evidence: 0, upcoming: 0 },
-  );
+  const now = new Date();
+  const summary = getTimelineSummary(eras, now);
+  const publicEras = eras.map((era) => ({
+    id: era.id,
+    slug: era.slug,
+    title: era.title,
+    theme: era.theme,
+    startYear: era.startYear,
+    endYear: era.endYear,
+    description: era.description,
+    signals: getTimelineSignals(era, now),
+  }));
 
-  return <TimelineClient eras={eras} summary={summary} />;
+  return <TimelineClient eras={publicEras} summary={summary} />;
 }

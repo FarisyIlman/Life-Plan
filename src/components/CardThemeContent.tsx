@@ -4,6 +4,7 @@ import type { ContentBlock } from "@prisma/client";
 import Image from "next/image";
 import type { ContentBlockPreview } from "@/lib/types";
 import MarkdownContent from "@/components/MarkdownContent";
+import { formatTimelineDate } from "@/lib/timeline-utils";
 
 type Theme = "VOYAGE" | "TREE" | "GENERIC";
 
@@ -59,7 +60,7 @@ export default function CardThemeContent({
           className={`text-xs mb-1 ${themeStyles.font}`}
           style={{ color: themeStyles.accent }}
         >
-          {new Date(block.deadline).toLocaleDateString("en-GB")}
+          {formatTimelineDate(new Date(block.deadline))}
         </p>
       )}
       <h4

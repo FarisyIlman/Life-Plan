@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import type { Era, ContentBlock, AchievementGoal } from "@prisma/client";
 import CardMonthlyTheme from "@/components/CardMonthlyTheme";
 import AchievementTracker from "@/components/AchievementTracker";
@@ -41,6 +41,7 @@ export default function MonthlyEraView({
   prevEra: EraNav;
   nextEra: EraNav;
 }) {
+  const prefersReducedMotion = useReducedMotion() ?? false;
   const publicBlocks = getPublicContentBlocks(era.contentBlocks);
   const { total, percentage: progress } = getContentProgress(era.contentBlocks);
 
@@ -81,10 +82,10 @@ export default function MonthlyEraView({
             : `${era.startYear}–${era.endYear}`}
         </p>
         <motion.h1
-          initial={{ opacity: 0, y: 20 }}
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="font-heading text-4xl sm:text-5xl md:text-6xl text-text-primary mb-4 break-words"
+          transition={{ duration: prefersReducedMotion ? 0 : 0.8 }}
+          className="font-heading text-4xl sm:text-5xl md:text-6xl text-text-primary mb-4 wrap-break-word"
         >
           {era.title}
         </motion.h1>
@@ -215,7 +216,7 @@ export default function MonthlyEraView({
         {prevEra ? (
           <Link
             href={`/timeline/${prevEra.slug}`}
-            className="min-h-11 flex items-center text-text-muted hover:text-accent transition break-words"
+            className="min-h-11 flex items-center text-text-muted hover:text-accent transition wrap-break-word"
           >
             ← {prevEra.title}
           </Link>
@@ -225,7 +226,7 @@ export default function MonthlyEraView({
         {nextEra ? (
           <Link
             href={`/timeline/${nextEra.slug}`}
-            className="min-h-11 flex items-center justify-end text-text-muted hover:text-accent transition break-words sm:text-right"
+            className="min-h-11 flex items-center justify-end text-text-muted hover:text-accent transition wrap-break-word sm:text-right"
           >
             {nextEra.title} →
           </Link>

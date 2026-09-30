@@ -12,6 +12,7 @@ import {
   getContentProgress,
   getPublicContentBlocks,
 } from "@/lib/content-progress";
+import { formatTimelineDate, isUpcomingDeadline } from "@/lib/timeline-utils";
 
 type EraWithBlocks = Era & {
   contentBlocks: ContentBlock[];
@@ -35,8 +36,11 @@ export default function GalaxyEraView({
     completed,
     percentage: progress,
   } = getContentProgress(era.contentBlocks);
+  const now = new Date();
   const nextDeadline = publicBlocks
-    .filter((block) => block.deadline && !block.isCompleted)
+    .filter((block) =>
+      isUpcomingDeadline(block.deadline, block.isCompleted, now),
+    )
     .sort(
       (a, b) => (a.deadline?.getTime() ?? 0) - (b.deadline?.getTime() ?? 0),
     )[0]?.deadline;
@@ -46,13 +50,13 @@ export default function GalaxyEraView({
     if (signalFilter === "ACTIVE") return !block.isCompleted;
     if (signalFilter === "COMPLETED") return block.isCompleted;
     if (signalFilter === "DEADLINES")
-      return Boolean(block.deadline && !block.isCompleted);
+      return isUpcomingDeadline(block.deadline, block.isCompleted, now);
     return true;
   });
 
   return (
     <div className="galaxy-page relative min-h-screen text-text-primary">
-      <div className="mx-auto max-w-6xl px-6 pt-8">
+      <div className="mx-auto max-w-6xl px-6 pt-20">
         <Link
           href="/timeline"
           className="inline-flex min-h-10 items-center text-sm text-text-muted transition-colors hover:text-galaxy-cyan"
@@ -136,7 +140,7 @@ export default function GalaxyEraView({
               Next deadline{" "}
               <span className="font-medium text-galaxy-gold">
                 {nextDeadline
-                  ? nextDeadline.toLocaleDateString("en-GB")
+                  ? formatTimelineDate(nextDeadline)
                   : "None scheduled"}
               </span>
             </p>
